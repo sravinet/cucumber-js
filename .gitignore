@@ -13,3 +13,5 @@ yarn-error.log
 .vscode
 .DS_Store
 src/version.ts
+.pnpm-store/
+.pnpm-debug.log

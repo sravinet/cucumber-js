@@ -16,9 +16,12 @@ jobs:
       - uses: actions/setup-node@v3
         with:
           node-version: '22'
-          cache: 'npm'
-          cache-dependency-path: package-lock.json
-      - run: npm install-test
+          cache: 'pnpm'
+      - uses: pnpm/action-setup@v2
+        with:
+          version: 8
+      - run: pnpm install
+      - run: pnpm test
       - uses: cucumber/action-publish-npm@v1.1.1
         with:
           npm-token: ${{ secrets.NPM_TOKEN }}
