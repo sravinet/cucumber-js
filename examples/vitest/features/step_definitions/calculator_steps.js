@@ -1,5 +1,5 @@
 import { Given, When, Then, Before } from '@cucumber/cucumber/vitest'
-import { strict as assert } from 'node:assert'
+import { expect } from 'vitest'
 
 // Clear the calculator before each scenario
 Before(function() {
@@ -27,5 +27,5 @@ When('I press divide', function() {
 })
 
 Then('the result should be {int} on the screen', function(expectedResult) {
-  assert.equal(this.result, expectedResult)
+  expect(this.result).toBe(expectedResult)
 }) 

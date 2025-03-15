@@ -1,5 +1,5 @@
 import { Given, When, Then, Before, DataTable } from '@cucumber/cucumber/vitest'
-import { strict as assert } from 'node:assert'
+import { expect } from 'vitest'
 import { Task } from '../../src/todo'
 import { ITodoWorld } from '../support/world'
 
@@ -33,17 +33,17 @@ When('I remove {string} from my todo list', function(this: ITodoWorld, task: str
 })
 
 Then('my todo list should contain {string}', function(this: ITodoWorld, task: string) {
-  assert.equal(this.hasTask(task), true, `Expected todo list to contain "${task}"`)
+  expect(this.hasTask(task)).toBe(true)
 })
 
 Then('my todo list should not contain {string}', function(this: ITodoWorld, task: string) {
-  assert.equal(this.hasTask(task), false, `Expected todo list not to contain "${task}"`)
+  expect(this.hasTask(task)).toBe(false)
 })
 
 Then('the task {string} should be completed', function(this: ITodoWorld, task: string) {
-  assert.equal(this.isTaskCompleted(task), true, `Expected task "${task}" to be completed`)
+  expect(this.isTaskCompleted(task)).toBe(true)
 })
 
 Then('the task {string} should not be completed', function(this: ITodoWorld, task: string) {
-  assert.equal(this.isTaskCompleted(task), false, `Expected task "${task}" not to be completed`)
+  expect(this.isTaskCompleted(task)).toBe(false)
 }) 
