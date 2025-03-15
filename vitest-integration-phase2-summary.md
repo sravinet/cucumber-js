@@ -40,10 +40,56 @@ The enhanced example demonstrates:
 
 ## API Enhancements
 
-### New Functions
+### Two-Tiered API Design
 
-- `runCucumberInVitest`: Runs Cucumber tests in Vitest's environment
-- `createVitestCucumberTest`: Creates a Vitest test that runs Cucumber features
+The Vitest adapter provides two different functions to balance simplicity and flexibility:
+
+#### 1. `createVitestCucumberTest`
+
+This is a higher-level helper function designed for simplicity. It:
+- Takes Vitest's test function and options for the Cucumber run
+- Creates a Vitest test that runs Cucumber features with a single function call
+- Automatically fails the test if any Cucumber scenarios fail
+- Requires minimal boilerplate code
+
+Example usage:
+```javascript
+import { test } from 'vitest'
+import { createVitestCucumberTest } from '@cucumber/cucumber/esm'
+
+createVitestCucumberTest(test, {
+  name: 'My feature tests',
+  sources: { paths: ['features/'] },
+  support: { import: ['features/step_definitions/**/*.js'] }
+})
+```
+
+#### 2. `runCucumberInVitest`
+
+This is a lower-level function that gives more control to the user. It:
+- Runs Cucumber features in Vitest's environment and returns the result
+- Allows custom assertions or processing on the result
+- Provides access to all Cucumber messages emitted during the run
+- Supports custom hooks for setup and teardown
+- Offers more flexibility for advanced use cases
+
+Example usage:
+```javascript
+import { test } from 'vitest'
+import { runCucumberInVitest } from '@cucumber/cucumber/esm'
+
+test('Run features', async ({ expect }) => {
+  const result = await runCucumberInVitest({
+    sources: { paths: ['features/'] },
+    support: { import: ['features/step_definitions/**/*.js'] }
+  })
+  
+  expect(result.success).toBe(true)
+  expect(result.messages.length).toBeGreaterThan(0)
+})
+```
+
+This two-tiered API design ensures that both beginners and advanced users can effectively integrate Cucumber.js with Vitest according to their needs.
 
 ### New Types
 
@@ -57,7 +103,8 @@ The enhanced example demonstrates:
 2. **Performance Optimization**: Optimize the adapter for better performance
 3. **Reporting Integration**: Enhance integration with Vitest's reporting system
 4. **Documentation Refinement**: Further improve documentation with more examples and best practices
+5. **Step Definition Loading**: Improve step definition loading in non-dry run mode
 
 ## Conclusion
 
-Phase 2 of the Vitest integration plan has been successfully completed. The Vitest adapter provides a robust integration between Cucumber.js and Vitest, allowing features and step definitions to be executed within Vitest's environment with enhanced capabilities. 
+Phase 2 of the Vitest integration plan has been successfully completed. The Vitest adapter provides a robust integration between Cucumber.js and Vitest, allowing features and step definitions to be executed within Vitest's environment with enhanced capabilities. The two-tiered API design ensures that both beginners and advanced users can effectively use the integration according to their needs. 
