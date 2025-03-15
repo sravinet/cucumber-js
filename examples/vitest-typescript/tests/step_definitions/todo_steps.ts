@@ -1,4 +1,4 @@
-import { Given, When, Then, Before, DataTable } from '@cucumber/cucumber/esm'
+import { Given, When, Then, Before, DataTable } from '@cucumber/cucumber/vitest'
 import { strict as assert } from 'node:assert'
 import { Task } from '../../src/todo'
 import { ITodoWorld } from '../support/world'

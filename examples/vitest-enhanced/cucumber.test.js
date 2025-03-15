@@ -1,5 +1,5 @@
 import { test, describe, beforeAll, afterAll } from 'vitest'
-import { createVitestCucumberTest, runCucumberInVitest } from '@cucumber/cucumber/esm'
+import { createVitestCucumberTest, runCucumberInVitest } from '@cucumber/cucumber/vitest'
 
 // Example of using the createVitestCucumberTest helper
 createVitestCucumberTest(test, {

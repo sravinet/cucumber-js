@@ -33,7 +33,7 @@ npm test
 
 ## How It Works
 
-This example uses the enhanced ESM entry point of Cucumber.js to run features within Vitest's environment. The `cucumber.test.ts` file uses Vitest's test API to run Cucumber features and assert on the results.
+This example uses the Vitest integration entry point of Cucumber.js to run features within Vitest's environment. The `cucumber.test.ts` file uses Vitest's test API to run Cucumber features and assert on the results.
 
 ## Notes
 

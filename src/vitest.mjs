@@ -1,18 +1,9 @@
 /**
- * ES Module entry point for Cucumber.js
+ * Vitest integration entry point for Cucumber.js
  * 
- * This file provides a complete ESM API surface for Cucumber.js,
- * ensuring compatibility with ESM-based tools like Vitest.
- * 
- * @deprecated The /esm entry point is deprecated and will be removed in a future version.
- * Please use @cucumber/cucumber for basic ESM features or @cucumber/cucumber/vitest for Vitest integration.
+ * This file provides the Vitest integration API surface for Cucumber.js,
+ * ensuring compatibility with Vitest and other ESM-based testing tools.
  */
-
-// Show deprecation warning
-console.warn(
-  'Warning: The @cucumber/cucumber/esm entry point is deprecated and will be removed in a future version.\n' +
-  'Please use @cucumber/cucumber for basic ESM features or @cucumber/cucumber/vitest for Vitest integration.'
-);
 
 // Import from API first (alphabetical order)
 import { runCucumber as apiRunCucumber } from './api/index.js'

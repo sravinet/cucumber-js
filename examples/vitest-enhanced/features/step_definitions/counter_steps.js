@@ -1,4 +1,4 @@
-import { Given, When, Then } from '@cucumber/cucumber/esm'
+import { Given, When, Then } from '@cucumber/cucumber/vitest'
 import { expect } from 'vitest'
 
 Given('the counter is at {int}', function(value) {

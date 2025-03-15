@@ -1,14 +1,11 @@
 /**
- * TypeScript declarations for the ESM entry point
- * 
- * @deprecated The /esm entry point is deprecated and will be removed in a future version.
- * Please use @cucumber/cucumber for basic ESM features or @cucumber/cucumber/vitest for Vitest integration.
+ * TypeScript declarations for the Vitest integration entry point
  */
 
 // Re-export all types from the main index
 export * from './index'
 
-// Additional exports specific to ESM
+// Additional exports specific to Vitest integration
 export interface IVitestOptions {
   /**
    * Options specific to Vitest integration

@@ -1,4 +1,4 @@
-import { setWorldConstructor } from '@cucumber/cucumber/esm'
+import { setWorldConstructor } from '@cucumber/cucumber/vitest'
 import { Counter } from '../../src/counter.js'
 
 /**

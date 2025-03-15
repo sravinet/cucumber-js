@@ -1,4 +1,4 @@
-import { setWorldConstructor, IWorld, IWorldOptions } from '@cucumber/cucumber/esm'
+import { setWorldConstructor, IWorld, IWorldOptions } from '@cucumber/cucumber/vitest'
 import { TodoList, Task } from '../../src/todo'
 
 /**

@@ -1,4 +1,4 @@
-import { Given, When, Then, Before } from '@cucumber/cucumber/esm'
+import { Given, When, Then, Before } from '@cucumber/cucumber/vitest'
 import { strict as assert } from 'node:assert'
 
 // Clear the calculator before each scenario

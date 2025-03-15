@@ -6,13 +6,13 @@ If your support code is written as ESM, you'll need to use the `import` configur
 
 ## Enhanced ESM Support
 
-Starting from version X.X.X, Cucumber.js provides enhanced ESM support through a dedicated ESM entry point. This makes it easier to use Cucumber.js with ESM-based tools like Vitest.
+Starting from version X.X.X, Cucumber.js provides enhanced ESM support through dedicated entry points. This makes it easier to use Cucumber.js with ESM-based tools.
 
-To use the enhanced ESM entry point, import from `@cucumber/cucumber/esm`:
+To use the basic ESM features, import directly from `@cucumber/cucumber`:
 
 ```javascript
-// Using the enhanced ESM entry point
-import { Given, When, Then } from '@cucumber/cucumber/esm'
+// Using the ESM features
+import { Given, When, Then } from '@cucumber/cucumber'
 
 Given('a variable set to {int}', function (number) {
   this.setTo(number)
@@ -21,7 +21,18 @@ Given('a variable set to {int}', function (number) {
 
 ## Vitest Integration
 
-The enhanced ESM entry point is designed to work seamlessly with Vitest. This allows you to run Cucumber.js features and step definitions within Vitest's environment.
+For Vitest integration, Cucumber.js provides a dedicated entry point. This allows you to run Cucumber.js features and step definitions within Vitest's environment.
+
+To use the Vitest integration, import from `@cucumber/cucumber/vitest`:
+
+```javascript
+// Using the Vitest integration
+import { Given, When, Then, runCucumber } from '@cucumber/cucumber/vitest'
+
+Given('a variable set to {int}', function (number) {
+  this.setTo(number)
+})
+```
 
 Example usage with Vitest:
 
@@ -39,7 +50,7 @@ export default defineConfig({
 ```javascript
 // cucumber.test.js
 import { test } from 'vitest'
-import { runCucumber } from '@cucumber/cucumber/esm'
+import { runCucumber } from '@cucumber/cucumber/vitest'
 
 test('Run Cucumber features', async () => {
   const result = await runCucumber({

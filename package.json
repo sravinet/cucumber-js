@@ -202,6 +202,10 @@
       "import": "./lib/esm.mjs",
       "types": "./lib/index.d.ts"
     },
+    "./vitest": {
+      "import": "./lib/vitest.mjs",
+      "types": "./lib/index.d.ts"
+    },
     "./api": {
       "import": "./lib/api/wrapper.mjs",
       "require": "./lib/api/index.js",
@@ -321,7 +325,7 @@
     "ansi-regex": "^5.0.1"
   },
   "scripts": {
-    "build-local": "genversion --es6 src/version.ts && tsc --build tsconfig.node.json && shx cp src/wrapper.mjs lib/ && shx cp src/esm.mjs lib/ && shx cp src/api/wrapper.mjs lib/api/",
+    "build-local": "genversion --es6 src/version.ts && tsc --build tsconfig.node.json && shx cp src/wrapper.mjs lib/ && shx cp src/esm.mjs lib/ && shx cp src/vitest.mjs lib/ && shx cp src/api/wrapper.mjs lib/api/ && shx cp src/vitest.d.ts lib/",
     "cck-test": "mocha 'compatibility/**/*_spec.ts'",
     "exports-generate-docs": "typedoc",
     "exports-test": "api-extractor run --config exports/api/api-extractor.json --verbose && api-extractor run --config exports/root/api-extractor.json --verbose",

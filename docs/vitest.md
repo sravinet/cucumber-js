@@ -41,7 +41,7 @@ Create a test file that will run your Cucumber features:
 ```javascript
 // cucumber.test.js
 import { test, expect } from 'vitest'
-import { runCucumber } from '@cucumber/cucumber/esm'
+import { runCucumber } from '@cucumber/cucumber/vitest'
 
 test('Run Cucumber features', async () => {
   const result = await runCucumber({
@@ -72,7 +72,7 @@ The simplest way to use the adapter is with the `createVitestCucumberTest` helpe
 ```javascript
 // cucumber.test.js
 import { test } from 'vitest'
-import { createVitestCucumberTest } from '@cucumber/cucumber/esm'
+import { createVitestCucumberTest } from '@cucumber/cucumber/vitest'
 
 createVitestCucumberTest(test, {
   name: 'My feature tests',
@@ -122,7 +122,7 @@ describe('Cucumber tests', () => {
   })
   
   test('Run features', async ({ expect }) => {
-    const { runCucumberInVitest } = await import('@cucumber/cucumber/esm')
+    const { runCucumberInVitest } = await import('@cucumber/cucumber/vitest')
     
     const result = await runCucumberInVitest({
       sources: {
@@ -207,7 +207,7 @@ You can use a custom World object with Vitest:
 
 ```javascript
 // features/support/world.js
-import { setWorldConstructor } from '@cucumber/cucumber/esm'
+import { setWorldConstructor } from '@cucumber/cucumber/vitest'
 
 class CustomWorld {
   constructor() {
@@ -232,7 +232,7 @@ You can use Cucumber hooks with Vitest:
 
 ```javascript
 // features/support/hooks.js
-import { Before, After } from '@cucumber/cucumber/esm'
+import { Before, After } from '@cucumber/cucumber/vitest'
 
 Before(async function() {
   // Setup code
@@ -293,7 +293,7 @@ For larger projects, organize your tests by feature or domain:
 ```javascript
 // auth.cucumber.test.js
 import { describe, test } from 'vitest'
-import { createVitestCucumberTest } from '@cucumber/cucumber/esm'
+import { createVitestCucumberTest } from '@cucumber/cucumber/vitest'
 
 describe('Authentication', () => {
   createVitestCucumberTest(test, {
@@ -369,7 +369,7 @@ createVitestCucumberTest(test, {
 If you encounter issues with ESM imports, ensure:
 
 1. Your `package.json` has `"type": "module"` or your files use the `.mjs` extension
-2. You're using the `/esm` entry point: `import { ... } from '@cucumber/cucumber/esm'`
+2. You're using the `/vitest` entry point: `import { ... } from '@cucumber/cucumber/vitest'`
 
 ### Vitest Environment
 
@@ -399,7 +399,7 @@ For debugging Cucumber tests in Vitest:
 ```javascript
 // cucumber.test.js
 import { test } from 'vitest'
-import { createVitestCucumberTest } from '@cucumber/cucumber/esm'
+import { createVitestCucumberTest } from '@cucumber/cucumber/vitest'
 
 createVitestCucumberTest(test, {
   name: 'Debug test',

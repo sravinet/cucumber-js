@@ -1,4 +1,4 @@
-import { setWorldConstructor } from '@cucumber/cucumber/esm'
+import { setWorldConstructor } from '@cucumber/cucumber/vitest'
 
 /**
  * Custom world object for the calculator example

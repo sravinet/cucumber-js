@@ -18,6 +18,7 @@ const copyFileAsync = promisify(copyFile);
 const files = [
   { src: 'src/wrapper.mjs', dest: 'lib/wrapper.mjs' },
   { src: 'src/esm.mjs', dest: 'lib/esm.mjs' },
+  { src: 'src/vitest.mjs', dest: 'lib/vitest.mjs' },
   { src: 'src/api/wrapper.mjs', dest: 'lib/api/wrapper.mjs' }
 ];
 
