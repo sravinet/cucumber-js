@@ -1,7 +1,6 @@
-import { EventEmitter } from 'node:events'
 import { expect } from 'chai'
 import { Envelope } from '@cucumber/messages'
-import { IRunResult, ISupportCodeLibrary, ISupportCodeCoordinates } from './types'
+import { IRunResult, ISupportCodeLibrary } from './types'
 import { runCucumberInVitest, createVitestCucumberTest, IVitestRunOptions } from './vitest'
 import * as runCucumberModule from './run_cucumber'
 
@@ -43,17 +42,40 @@ const mockTestFn = (name: string, fn: () => Promise<void>): void => {
 mockTestFn.lastFn = null as any
 mockTestFn.lastName = ''
 
+// Mock for jest-like functionality
+// eslint-disable-next-line @typescript-eslint/ban-types
+const mockImplementation = (fn: Function) => {
+  // Create a copy of the module to avoid modifying the original
+  const mockModule = { ...runCucumberModule }
+  // Store the original function
+  const original = runCucumberModule.runCucumber
+  // Replace the function in the copy
+  mockModule.runCucumber = fn as typeof runCucumberModule.runCucumber
+  
+  // Replace the module's function with our mock
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  (runCucumberModule as any).runCucumber = fn
+  
+  return {
+    mockRestore: () => {
+      // Restore the original function
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (runCucumberModule as any).runCucumber = original
+    }
+  }
+}
+
 describe('Vitest Adapter', () => {
-  const originalRunCucumber = runCucumberModule.runCucumber
+  let mockSpy: { mockRestore: () => void }
 
   beforeEach(() => {
-    // Use jest.spyOn or similar to mock the function
-    jest.spyOn(runCucumberModule, 'runCucumber').mockImplementation(mockRunCucumber.runCucumber)
+    // Mock the runCucumber function
+    mockSpy = mockImplementation(mockRunCucumber.runCucumber)
   })
 
   afterEach(() => {
     // Restore the original implementation
-    jest.restoreAllMocks()
+    mockSpy.mockRestore()
   })
 
   describe('runCucumberInVitest', () => {
@@ -146,7 +168,8 @@ describe('Vitest Adapter', () => {
       let afterAllCalled = false
       
       // Override mock to throw an error
-      jest.spyOn(runCucumberModule, 'runCucumber').mockImplementation(async () => {
+      mockSpy.mockRestore()
+      mockSpy = mockImplementation(async () => {
         throw new Error('Test error')
       })
 
@@ -271,7 +294,8 @@ describe('Vitest Adapter', () => {
 
     it('should throw an error if Cucumber tests fail', async () => {
       // Override mock to return failure
-      jest.spyOn(runCucumberModule, 'runCucumber').mockImplementation(async () => ({ 
+      mockSpy.mockRestore()
+      mockSpy = mockImplementation(async () => ({ 
         success: false, 
         support: mockSupportCodeLibrary 
       }))

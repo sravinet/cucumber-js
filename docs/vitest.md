@@ -61,9 +61,9 @@ test('Run Cucumber features', async () => {
 npx vitest
 ```
 
-## Enhanced Vitest Adapter (New)
+## Enhanced Vitest Adapter
 
-Cucumber.js now provides an enhanced Vitest adapter that offers deeper integration with Vitest.
+Cucumber.js provides an enhanced Vitest adapter that offers deeper integration with Vitest.
 
 ### Using the createVitestCucumberTest Helper
 
@@ -76,9 +76,35 @@ import { createVitestCucumberTest } from '@cucumber/cucumber/esm'
 
 createVitestCucumberTest(test, {
   name: 'My feature tests',
-  paths: ['features/'],
-  import: ['features/step_definitions/**/*.js', 'features/support/**/*.js'],
-  format: ['summary']
+  sources: {
+    paths: ['features/'],
+    defaultDialect: 'en',
+    names: [],
+    tagExpression: '',
+    order: 'defined'
+  },
+  support: {
+    importPaths: ['features/step_definitions/**/*.js', 'features/support/**/*.js'],
+    requirePaths: [],
+    requireModules: [],
+    loaders: []
+  },
+  runtime: {
+    dryRun: false,
+    failFast: false,
+    filterStacktraces: true,
+    parallel: 0,
+    retry: 0,
+    retryTagFilter: '',
+    strict: false,
+    worldParameters: {}
+  },
+  formats: {
+    stdout: 'summary',
+    files: {},
+    publish: false,
+    options: {}
+  }
 })
 ```
 
@@ -99,9 +125,35 @@ describe('Cucumber tests', () => {
     const { runCucumberInVitest } = await import('@cucumber/cucumber/esm')
     
     const result = await runCucumberInVitest({
-      paths: ['features/'],
-      import: ['features/step_definitions/**/*.js', 'features/support/**/*.js'],
-      format: ['summary'],
+      sources: {
+        paths: ['features/'],
+        defaultDialect: 'en',
+        names: [],
+        tagExpression: '',
+        order: 'defined'
+      },
+      support: {
+        importPaths: ['features/step_definitions/**/*.js', 'features/support/**/*.js'],
+        requirePaths: [],
+        requireModules: [],
+        loaders: []
+      },
+      runtime: {
+        dryRun: false,
+        failFast: false,
+        filterStacktraces: true,
+        parallel: 0,
+        retry: 0,
+        retryTagFilter: '',
+        strict: false,
+        worldParameters: {}
+      },
+      formats: {
+        stdout: 'summary',
+        files: {},
+        publish: false,
+        options: {}
+      },
       vitest: {
         vitestEnvironment: 'node',
         hooks: {
@@ -205,6 +257,111 @@ For TypeScript support, ensure your `tsconfig.json` is configured for ESM:
 }
 ```
 
+## Best Practices
+
+### 1. Reusing Support Code Libraries
+
+The Vitest adapter includes performance optimizations that cache support code libraries between test runs. To take advantage of this:
+
+```javascript
+// Use the same support code paths across multiple test runs
+const supportPaths = {
+  importPaths: ['features/step_definitions/**/*.js', 'features/support/**/*.js']
+}
+
+// First test
+createVitestCucumberTest(test, {
+  name: 'Feature A',
+  sources: { paths: ['features/featureA.feature'], /* ... */ },
+  support: supportPaths,
+  // ...
+})
+
+// Second test - will reuse the cached support code library
+createVitestCucumberTest(test, {
+  name: 'Feature B',
+  sources: { paths: ['features/featureB.feature'], /* ... */ },
+  support: supportPaths,
+  // ...
+})
+```
+
+### 2. Organizing Tests
+
+For larger projects, organize your tests by feature or domain:
+
+```javascript
+// auth.cucumber.test.js
+import { describe, test } from 'vitest'
+import { createVitestCucumberTest } from '@cucumber/cucumber/esm'
+
+describe('Authentication', () => {
+  createVitestCucumberTest(test, {
+    name: 'Login features',
+    sources: { paths: ['features/auth/login.feature'], /* ... */ },
+    // ...
+  })
+  
+  createVitestCucumberTest(test, {
+    name: 'Registration features',
+    sources: { paths: ['features/auth/registration.feature'], /* ... */ },
+    // ...
+  })
+})
+```
+
+### 3. Detailed Error Reporting
+
+The Vitest adapter provides detailed error reporting for failed scenarios. When a test fails, you'll see:
+
+- The name of the failed scenario
+- The file and line number where the failure occurred
+- The error message from the step that failed
+
+This makes it easier to identify and fix issues.
+
+### 4. Parallel Execution
+
+For faster test execution, you can use Vitest's worker threads:
+
+```javascript
+// vitest.config.js
+import { defineConfig } from 'vitest/config'
+
+export default defineConfig({
+  test: {
+    environment: 'node',
+    include: ['**/*.cucumber.test.js'],
+    pool: 'threads',
+    poolOptions: {
+      threads: {
+        singleThread: false
+      }
+    }
+  }
+})
+```
+
+### 5. Step Definition Loading Optimization
+
+To improve performance, especially in larger projects:
+
+1. Organize step definitions by feature or domain
+2. Only load the step definitions needed for each test
+3. Use the caching mechanism by reusing support code libraries
+
+```javascript
+// Only load relevant step definitions
+createVitestCucumberTest(test, {
+  name: 'Authentication features',
+  sources: { paths: ['features/auth/**/*.feature'] },
+  support: {
+    importPaths: ['features/step_definitions/auth/**/*.js', 'features/support/**/*.js']
+  },
+  // ...
+})
+```
+
 ## Troubleshooting
 
 ### ESM Issues
@@ -223,6 +380,41 @@ If your tests require a specific environment (like DOM manipulation), configure 
 export default defineConfig({
   test: {
     environment: 'jsdom' // or 'happy-dom', 'node', etc.
+  }
+})
+```
+
+### Step Definition Not Found
+
+If you're getting "Step definition not found" errors:
+
+1. Check that your import paths are correct
+2. Ensure your step definitions are being loaded before the scenarios run
+3. Try using `requirePaths` instead of `importPaths` if you're using CommonJS modules
+
+### Debugging
+
+For debugging Cucumber tests in Vitest:
+
+```javascript
+// cucumber.test.js
+import { test } from 'vitest'
+import { createVitestCucumberTest } from '@cucumber/cucumber/esm'
+
+createVitestCucumberTest(test, {
+  name: 'Debug test',
+  sources: { paths: ['features/failing.feature'] },
+  support: { importPaths: ['features/step_definitions/**/*.js'] },
+  runtime: {
+    // Enable for more verbose output
+    filterStacktraces: false
+  },
+  formats: {
+    // Use a more detailed formatter
+    stdout: 'progress',
+    files: {
+      './cucumber-report.json': 'json'
+    }
   }
 })
 ```
