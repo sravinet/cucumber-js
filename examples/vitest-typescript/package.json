@@ -1,0 +1,17 @@
+{
+  "name": "cucumber-vitest-typescript-example",
+  "version": "1.0.0",
+  "description": "Example of using Cucumber.js with Vitest and TypeScript",
+  "type": "module",
+  "scripts": {
+    "test": "vitest run",
+    "build": "tsc"
+  },
+  "dependencies": {
+    "@cucumber/cucumber": "file:../../"
+  },
+  "devDependencies": {
+    "typescript": "^5.0.0",
+    "vitest": "^1.0.0"
+  }
+} 

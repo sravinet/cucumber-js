@@ -198,6 +198,10 @@
       "require": "./lib/index.js",
       "types": "./lib/index.d.ts"
     },
+    "./esm": {
+      "import": "./lib/esm.mjs",
+      "types": "./lib/index.d.ts"
+    },
     "./api": {
       "import": "./lib/api/wrapper.mjs",
       "require": "./lib/api/index.js",
@@ -252,7 +256,7 @@
     "string-argv": "0.3.1",
     "supports-color": "^8.1.1",
     "tmp": "0.2.3",
-    "type-fest": "^4.8.3",
+    "type-fest": "^4.37.0",
     "util-arity": "^1.1.0",
     "yaml": "^2.2.2",
     "yup": "1.2.0"
@@ -265,7 +269,7 @@
     "@types/chai": "4.3.20",
     "@types/debug": "4.1.12",
     "@types/dirty-chai": "2.0.5",
-    "@types/express": "4.17.21",
+    "@types/express": "^5.0.0",
     "@types/fs-extra": "9.0.13",
     "@types/glob": "8.1.0",
     "@types/has-ansi": "5.0.2",
@@ -311,13 +315,13 @@
     "tsd": "0.31.2",
     "typedoc": "^0.26.11",
     "typedoc-plugin-extras": "^3.1.0",
-    "typescript": "^4.9.5"
+    "typescript": "^5.8.2"
   },
   "overrides": {
     "ansi-regex": "^5.0.1"
   },
   "scripts": {
-    "build-local": "genversion --es6 src/version.ts && tsc --build tsconfig.node.json && shx cp src/wrapper.mjs lib/ && shx cp src/api/wrapper.mjs lib/api/",
+    "build-local": "genversion --es6 src/version.ts && tsc --build tsconfig.node.json && shx cp src/wrapper.mjs lib/ && shx cp src/esm.mjs lib/ && shx cp src/api/wrapper.mjs lib/api/",
     "cck-test": "mocha 'compatibility/**/*_spec.ts'",
     "exports-generate-docs": "typedoc",
     "exports-test": "api-extractor run --config exports/api/api-extractor.json --verbose && api-extractor run --config exports/root/api-extractor.json --verbose",
@@ -342,7 +346,13 @@
     "test-coverage": "nyc --silent mocha 'src/**/*_spec.ts' 'compatibility/**/*_spec.ts' && nyc --silent --no-clean node bin/cucumber.js --tags \"not @source-mapping\" && nyc report --reporter=lcov",
     "test": "npm run lint && npm run exports-test && npm run types-test && npm run unit-test && npm run cck-test && npm run feature-test",
     "types-test": "tsd",
-    "unit-test": "mocha 'src/**/*_spec.ts'"
+    "unit-test": "mocha 'src/**/*_spec.ts'",
+    "verify-esm": "npm run build-local && node verification/esm-verification.mjs",
+    "verify-examples": "node verification/examples-verification.js",
+    "verify-docs": "node verification/docs-verification.js",
+    "verify-phase1": "npm run verify-esm && npm run verify-examples && npm run verify-docs",
+    "verify-phase1-no-build": "node verification/verify-without-build.mjs",
+    "verify-phase1-esm-only": "node verification/verify-phase1-with-esm-build.mjs"
   },
   "bin": {
     "cucumber-js": "bin/cucumber.js"
