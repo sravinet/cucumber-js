@@ -23,6 +23,12 @@ export interface CucumberTestOptions {
   features: (string | FeatureFile)[];
   
   /**
+   * Tag expression to filter scenarios
+   * @example '@smoke and not @slow'
+   */
+  tagExpression?: string;
+  
+  /**
    * World parameters
    */
   worldParameters?: Record<string, any>;
@@ -119,7 +125,10 @@ export function createCucumberTest(
       support: {
         worldParameters: options.worldParameters
       },
-      runtime: options.runtime
+      runtime: options.runtime,
+      filters: {
+        tagExpression: options.tagExpression
+      }
     }, workerRuntime);
     
     // Assert that the test run was successful

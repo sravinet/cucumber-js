@@ -5,6 +5,8 @@
  * via vitest-pool-workers.
  */
 
+import { TagFilter } from '../core/tag-filter.js';
+
 /**
  * Interface for the Workers runtime environment
  */
@@ -105,6 +107,22 @@ export interface WorkersCucumberOptions {
      */
     options?: Record<string, any>;
   };
+  
+  /**
+   * Filter options
+   */
+  filters?: {
+    /**
+     * Tag expression to filter scenarios
+     * @example '@smoke and not @slow'
+     */
+    tagExpression?: string;
+    
+    /**
+     * Names to filter scenarios
+     */
+    names?: string[];
+  };
 }
 
 /**
@@ -155,11 +173,18 @@ export interface WorkersCucumberResult {
  * @returns Result of the Cucumber run
  */
 export async function runCucumberInWorkers(
-  _options: WorkersCucumberOptions,
-  _runtime: WorkersRuntime
+  options: WorkersCucumberOptions,
+  runtime: WorkersRuntime
 ): Promise<WorkersCucumberResult> {
   // This is a placeholder implementation that will be expanded
   // in Phase 1 as we integrate with vitest-pool-workers
+  
+  // Create a tag filter if a tag expression is provided
+  let tagFilter: TagFilter | undefined;
+  if (options.filters?.tagExpression) {
+    tagFilter = new TagFilter(options.filters.tagExpression);
+    runtime.console.log(`Filtering scenarios with tag expression: ${options.filters.tagExpression}`);
+  }
   
   // For now, we'll just return a mock result
   return {
