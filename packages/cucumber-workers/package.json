@@ -30,6 +30,10 @@
     "build": "node scripts/build.js",
     "test": "vitest run",
     "test:watch": "vitest",
+    "test:workers": "vitest run --config vitest.workers.config.ts",
+    "test:workers:watch": "vitest --config vitest.workers.config.ts",
+    "test:all-workers": "vitest run --config vitest.all-workers.config.ts",
+    "test:all-workers:watch": "vitest --config vitest.all-workers.config.ts",
     "prepublishOnly": "npm run build"
   },
   "keywords": [

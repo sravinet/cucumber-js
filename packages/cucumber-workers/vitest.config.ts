@@ -5,6 +5,11 @@ export default defineConfig({
     environment: 'node',
     globals: true,
     include: ['test/**/*.test.ts'],
+    exclude: [
+      // Exclude tests that are specifically for the Workers environment
+      // when running in Node.js
+      'test/**/scenario-outline-processor.test.ts'
+    ],
     coverage: {
       provider: 'istanbul',
       reporter: ['text', 'json', 'html'],
