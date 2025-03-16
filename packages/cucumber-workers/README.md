@@ -133,11 +133,24 @@ createCucumberTest(
 interface CucumberTestOptions {
   name: string;
   features: (string | FeatureFile)[];
+  tagExpression?: string;
   worldParameters?: Record<string, any>;
   runtime?: {
     dryRun?: boolean;
     failFast?: boolean;
   };
+  formatters?: FormatterConfig[];
+}
+```
+
+### FormatterConfig
+
+```typescript
+interface FormatterConfig {
+  type: 'basic' | 'json' | 'progress' | 'summary';
+  formatter?: BasicFormatter | JsonFormatter | ProgressFormatter;
+  outputFile?: string;
+  options?: Record<string, any>;
 }
 ```
 
@@ -174,13 +187,68 @@ registry.register('I have {int} cucumbers', function(count) {
 
 ### BasicFormatter
 
-Formats test results for display.
+Formats test results for display with detailed output.
 
 ```typescript
 const formatter = new BasicFormatter({ colors: true, showSteps: true });
 formatter.start();
 // Run tests
 formatter.end();
+```
+
+### ProgressFormatter
+
+Formats test results with minimal output, showing progress as tests run.
+
+```typescript
+const formatter = new ProgressFormatter({ colors: true });
+formatter.start();
+// Run tests
+formatter.end();
+```
+
+### JsonFormatter
+
+Formats test results as JSON for integration with reporting tools.
+
+```typescript
+const formatter = new JsonFormatter({ 
+  includeSource: false, 
+  includeAttachments: true 
+});
+formatter.start();
+// Run tests
+formatter.end();
+```
+
+## Formatters in Test Configuration
+
+You can specify formatters in your test configuration:
+
+```typescript
+createCucumberTest(test, {
+  name: 'My Cucumber Test',
+  features: [/* ... */],
+  formatters: [
+    { type: 'basic' },                // Use the basic formatter
+    { type: 'progress' },             // Use the progress formatter
+    { type: 'json', outputFile: 'cucumber-report.json' } // Output JSON to a file
+  ]
+});
+```
+
+Or use custom formatter instances:
+
+```typescript
+const customFormatter = new ProgressFormatter({ colors: true });
+
+createCucumberTest(test, {
+  name: 'My Cucumber Test',
+  features: [/* ... */],
+  formatters: [
+    { type: 'progress', formatter: customFormatter }
+  ]
+});
 ```
 
 ## Development Workflow

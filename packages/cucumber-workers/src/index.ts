@@ -41,6 +41,11 @@ export {
   type JsonFormatterOptions
 } from './formatters/json-formatter.js';
 
+export {
+  ProgressFormatter,
+  type ProgressFormatterOptions
+} from './formatters/progress-formatter.js';
+
 // DSL functions for step definitions
 import { ParameterTypeRegistry, ParameterType } from '@cucumber/cucumber-expressions';
 import { WorkersStepRegistry } from './core/step-registry.js';

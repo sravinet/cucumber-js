@@ -11,6 +11,7 @@ export default defineConfig({
       // Include only tests that are specifically for the Workers environment
       'test/**/workers-runtime-adapter-cloudflare.test.ts',
       'test/**/json-formatter-cloudflare.test.ts',
+      'test/**/progress-formatter-cloudflare.test.ts',
       'test/**/cloudflare-integration.test.ts'
     ],
     coverage: {
