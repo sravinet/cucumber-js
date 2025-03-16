@@ -11,6 +11,12 @@ export { WorkersFeatureLoader, type FeatureFile } from './core/feature-loader.js
 export { WorkersStepRegistry, type StepDefinition, type StepDefinitionFunction } from './core/step-registry.js';
 export { HookRegistry, HookType, type HookOptions, type HookFunction } from './core/hook-registry.js';
 export { DataTable } from './core/data-table.js';
+export { TagFilter } from './core/tag-filter.js';
+export { 
+  ScenarioOutlineProcessor, 
+  type ProcessedScenario, 
+  type ProcessedStep 
+} from './core/scenario-outline-processor.js';
 
 // Adapters
 export {
@@ -29,6 +35,11 @@ export {
   type TestSummary,
   type FormatterOptions
 } from './formatters/basic-formatter.js';
+
+export {
+  JsonFormatter,
+  type JsonFormatterOptions
+} from './formatters/json-formatter.js';
 
 // DSL functions for step definitions
 import { ParameterTypeRegistry, ParameterType } from '@cucumber/cucumber-expressions';

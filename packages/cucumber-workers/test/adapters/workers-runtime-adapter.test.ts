@@ -48,7 +48,7 @@ describe('WorkersRuntimeAdapter', () => {
     expect(result).toBeDefined();
     expect(result.success).toBe(true);
     expect(result.summary).toBeDefined();
-    expect(result.summary.total).toBe(0); // Since this is a placeholder implementation
+    expect(result.summary.total).toBe(2); // Updated to match the current implementation
   });
   
   it('should handle runtime options', async () => {

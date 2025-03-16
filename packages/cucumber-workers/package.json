@@ -49,7 +49,10 @@
     "@cucumber/tag-expressions": "^5.0.1"
   },
   "devDependencies": {
+    "@cloudflare/vite-plugin": "0.1.11",
+    "@cloudflare/vitest-pool-workers": "0.8.0",
     "@types/node": "^18.0.0",
+    "miniflare": "4.20250310.0",
     "typescript": "^5.0.0",
     "vite": "^5.0.0",
     "vitest": "^0.34.6"

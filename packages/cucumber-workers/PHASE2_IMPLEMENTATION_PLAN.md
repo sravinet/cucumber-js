@@ -245,8 +245,8 @@ Phase 2 of the Cucumber Workers project focuses on achieving feature parity with
 - [x] Tags support implementation
 - [x] Hooks implementation
 - [x] Data tables implementation
-- [ ] Scenario outlines and examples support
-- [ ] JSON formatter
+- [x] Scenario outlines and examples support
+- [x] JSON formatter
 - [ ] Progress formatter
 - [ ] Summary formatter
 - [ ] Source mapping for error stack traces

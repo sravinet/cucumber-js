@@ -6,6 +6,7 @@ export default defineConfig({
     globals: true,
     include: ['test/**/*.test.ts'],
     coverage: {
+      provider: 'istanbul',
       reporter: ['text', 'json', 'html'],
       exclude: ['node_modules/', 'test/']
     },

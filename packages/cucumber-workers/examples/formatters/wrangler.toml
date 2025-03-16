@@ -1,0 +1,33 @@
+name = "cucumber-json-formatter"
+main = "./json-formatter-cloudflare.ts"
+compatibility_date = "2023-12-01"
+
+# KV Namespace for storing test results
+kv_namespaces = [
+  { binding = "CUCUMBER_RESULTS", id = "YOUR_KV_NAMESPACE_ID" }
+]
+
+# Optional: Environment variables
+[vars]
+CUCUMBER_CONFIG = "{\"includeSource\": true, \"includeAttachments\": true}"
+
+# Optional: Secrets (for authentication, etc.)
+# [secrets]
+# API_TOKEN
+
+# Routes
+# routes = [
+#   { pattern = "cucumber-tests.example.com/*", zone_name = "example.com" }
+# ]
+
+# Optional: Triggers
+# [triggers]
+# crons = ["0 0 * * *"] # Run tests daily at midnight
+
+# Optional: Usage limits
+[limits]
+cpu_ms = 200 # Maximum CPU time in ms
+
+# Development settings
+[dev]
+port = 8787 
