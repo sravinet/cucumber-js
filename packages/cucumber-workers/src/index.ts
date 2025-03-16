@@ -29,27 +29,35 @@ export {
 // Formatters
 export {
   BasicFormatter,
-  TestStatus,
-  type StepResult,
-  type ScenarioResult,
-  type TestSummary,
   type FormatterOptions
 } from './formatters/basic-formatter.js';
+export { JsonFormatter } from './formatters/json-formatter.js';
+export { ProgressFormatter } from './formatters/progress-formatter.js';
+export { SummaryFormatter } from './formatters/summary-formatter.js';
+
+// Performance Optimizations
+export {
+  createLazyIterable,
+  MemoryEfficientCache,
+  StringBuilderOptimized,
+  processBatches,
+  createObjectPool,
+  optimizeArrayMemory,
+  MemoryTracker
+} from './utils/memory-optimizations.js';
 
 export {
-  JsonFormatter,
-  type JsonFormatterOptions
-} from './formatters/json-formatter.js';
-
-export {
-  ProgressFormatter,
-  type ProgressFormatterOptions
-} from './formatters/progress-formatter.js';
-
-export {
-  SummaryFormatter,
-  type SummaryFormatterOptions
-} from './formatters/summary-formatter.js';
+  runWithConcurrencyLimit,
+  measureExecutionTime,
+  runWithTimeout,
+  memoize,
+  memoizeAsync,
+  runWithPriority,
+  processInChunks,
+  executeWithRetry,
+  executeWithAbortSignal,
+  executeWithDeadline
+} from './utils/execution-optimizations.js';
 
 // Utils
 export {
