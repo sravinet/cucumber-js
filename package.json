@@ -319,7 +319,8 @@
     "tsd": "0.31.2",
     "typedoc": "^0.26.11",
     "typedoc-plugin-extras": "^3.1.0",
-    "typescript": "^5.8.2"
+    "typescript": "^5.8.2",
+    "vitest": "3.0.8"
   },
   "overrides": {
     "ansi-regex": "^5.0.1"
@@ -357,7 +358,9 @@
     "verify-phase1": "pnpm run verify-esm && pnpm run verify-examples && pnpm run verify-docs",
     "verify-phase1-no-build": "node verification/verify-without-build.mjs",
     "verify-phase1-esm-only": "node verification/verify-phase1-with-esm-build.mjs",
-    "test:cucumber-workers:cloudflare": "cd packages/cucumber-workers && pnpm run test:examples:cloudflare"
+    "test:cucumber-workers:cloudflare": "cd packages/cucumber-workers && pnpm run test:examples:cloudflare",
+    "test:hono": "cd packages/hono-cucumber-demo && pnpm run test",
+    "link:hono": "cd packages/hono-cucumber-demo && node link-cucumber-workers.js"
   },
   "bin": {
     "cucumber-js": "bin/cucumber.js"

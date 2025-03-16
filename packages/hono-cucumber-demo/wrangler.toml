@@ -1,0 +1,14 @@
+name = "hono-cucumber-demo"
+main = "src/index.ts"
+compatibility_date = "2023-12-01"
+
+# KV Namespace for the counter
+kv_namespaces = [
+  { binding = "COUNTER", id = "demo-counter", preview_id = "demo-counter-preview" }
+]
+
+[dev]
+port = 8787
+
+[build]
+command = "npm run build" 
