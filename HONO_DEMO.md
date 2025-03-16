@@ -11,14 +11,8 @@ pnpm run test:hono
 ```
 
 This command automatically:
-1. Links the cucumber-workers package
+1. Builds the cucumber-workers package if needed
 2. Runs all the tests using Vitest
-
-If you need to manually link the package:
-
-```bash
-pnpm run link:hono
-```
 
 ## Navigating to the Demo Directory
 

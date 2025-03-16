@@ -23,19 +23,16 @@ You have several options to install dependencies:
    pnpm install
    ```
 
-2. **Using npm scripts**:
+2. **Using the setup script**:
    ```bash
-   pnpm run setup        # Run the setup script
-   pnpm run install:deps # Run the dependency installation script
+   pnpm run setup
    ```
+   This will:
+   - Install dependencies
+   - Build the cucumber-workers package
+   - Create the required KV namespaces for Cloudflare Workers
 
-3. **Using the setup script**:
-   ```bash
-   ./setup.sh
-   ```
-   This will install dependencies and create the required KV namespaces.
-
-4. **Using the install-deps.js script**:
+3. **Using the install-deps.js script**:
    ```bash
    node install-deps.js
    ```
@@ -60,7 +57,7 @@ pnpm test
 ```
 
 This command automatically:
-1. Links the `cucumber-workers` package
+1. Builds the `cucumber-workers` package if needed
 2. Runs all the tests using Vitest
 
 For development with watch mode:
@@ -69,26 +66,17 @@ For development with watch mode:
 pnpm run test:watch
 ```
 
-### Linking the cucumber-workers package
+### Package Dependencies
 
-The linking process happens automatically before tests run. If you need to manually link the package:
-
-```bash
-pnpm run link-cucumber-workers
-```
-
-This script:
-1. Checks if the `cucumber-workers` package is built
-2. Creates a symlink from the local `cucumber-workers` package to the `node_modules/@cucumber/cucumber-workers` directory
-3. Ensures that the tests can find the package
+This project uses PNPM workspace features to manage dependencies between packages in the monorepo. The `@cucumber/cucumber-workers` package is referenced as a workspace dependency, which means PNPM automatically links it during installation.
 
 ## Troubleshooting
 
 If you encounter issues with running the tests:
 
-1. **Manually link the package**: 
+1. **Rebuild the cucumber-workers package**: 
    ```bash
-   pnpm run link-cucumber-workers
+   pnpm run build-cucumber-workers
    ```
 
 2. **Check for missing dependencies**: 

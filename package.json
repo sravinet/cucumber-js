@@ -359,9 +359,8 @@
     "verify-phase1-no-build": "node verification/verify-without-build.mjs",
     "verify-phase1-esm-only": "node verification/verify-phase1-with-esm-build.mjs",
     "test:cucumber-workers:cloudflare": "cd packages/cucumber-workers && pnpm run test:examples:cloudflare",
-    "pretest:hono": "pnpm run link:hono",
-    "test:hono": "cd packages/hono-cucumber-demo && pnpm run test",
-    "link:hono": "cd packages/hono-cucumber-demo && node link-cucumber-workers.js"
+    "pretest:hono": "cd packages/cucumber-workers && pnpm run build",
+    "test:hono": "cd packages/hono-cucumber-demo && pnpm run test"
   },
   "bin": {
     "cucumber-js": "bin/cucumber.js"

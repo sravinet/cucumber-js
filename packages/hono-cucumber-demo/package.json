@@ -7,11 +7,11 @@
     "dev": "wrangler dev src/index.ts",
     "build": "wrangler deploy --dry-run --outdir=dist",
     "deploy": "wrangler deploy",
-    "link-cucumber-workers": "node link-cucumber-workers.js",
-    "pretest": "node link-cucumber-workers.js",
+    "pretest": "pnpm run build-cucumber-workers",
+    "build-cucumber-workers": "cd ../cucumber-workers && pnpm run build",
     "test": "npx vitest run",
     "test:watch": "npx vitest",
-    "setup": "./setup.sh",
+    "setup": "node setup.js",
     "postinstall": "node -e \"console.log('Installation complete! Run \\'pnpm run dev\\' to start the app or \\'pnpm test\\' to run tests.')\""
   },
   "dependencies": {
@@ -20,7 +20,7 @@
   "devDependencies": {
     "@cloudflare/vitest-pool-workers": "^0.8.0",
     "@cloudflare/workers-types": "^4.20240208.0",
-    "@cucumber/cucumber-workers": "^0.1.0",
+    "@cucumber/cucumber-workers": "workspace:*",
     "typescript": "^5.0.0",
     "vite": "^5.0.0",
     "vitest": "^0.34.6",

@@ -262,7 +262,8 @@ export class SourceMapper {
     // Get the original source content if available and requested
     let content: string | undefined;
     if (this.options.includeSourceContent) {
-      content = consumer.sourceContentFor(originalPosition.source);
+      const sourceContent = consumer.sourceContentFor(originalPosition.source);
+      content = sourceContent !== null ? sourceContent : undefined;
     }
     
     return {
