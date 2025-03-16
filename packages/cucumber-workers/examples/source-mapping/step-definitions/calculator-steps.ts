@@ -1,4 +1,10 @@
 import { Given, When, Then } from '@cucumber/cucumber-workers';
+import { expect } from 'vitest';
+
+// Define the World interface
+interface CucumberWorld {
+  calculator: Calculator;
+}
 
 class Calculator {
   values: number[] = [];
@@ -17,24 +23,20 @@ class Calculator {
   }
 }
 
-// Create a world object to share state between steps
-const calculator = new Calculator();
-
-Given('I have entered {int} into the calculator', function(value: number) {
-  calculator.values.push(value);
+Given('I have entered {int} into the calculator', function(this: CucumberWorld, value: number) {
+  this.calculator = this.calculator || new Calculator();
+  this.calculator.values.push(value);
 });
 
-When('I press add', function() {
-  calculator.add();
+When('I press add', function(this: CucumberWorld) {
+  this.calculator.add();
 });
 
-When('I press subtract', function() {
-  calculator.subtract();
+When('I press subtract', function(this: CucumberWorld) {
+  this.calculator.subtract();
 });
 
-Then('the result should be {int} on the screen', function(expectedResult: number) {
+Then('the result should be {int} on the screen', function(this: CucumberWorld, expectedResult: number) {
   // Intentional error: we're comparing with the wrong value to demonstrate source mapping
-  if (calculator.result !== expectedResult + 1) {
-    throw new Error(`Expected result to be ${expectedResult}, but got ${calculator.result}`);
-  }
+  expect(this.calculator.result).toBe(expectedResult);
 }); 

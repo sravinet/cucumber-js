@@ -8,7 +8,12 @@ import calculatorFeature from './features/calculator.feature';
 // Create a Cucumber test with source mapping enabled
 createCucumberTest(test, {
   name: 'Calculator features with source mapping',
-  features: [calculatorFeature],
+  features: [
+    {
+      path: 'examples/source-mapping/features/calculator.feature',
+      content: calculatorFeature
+    }
+  ],
   runtime: {
     // Use source maps for error stack traces
     useSourceMaps: true,

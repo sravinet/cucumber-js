@@ -15,7 +15,11 @@ The example includes:
 To run the example, use the following command from the root of the cucumber-workers package:
 
 ```bash
+# Run in Node environment
 npm run test -- examples/source-mapping/calculator.test.ts
+
+# Run in Cloudflare Workers environment
+npm run test:examples:cloudflare
 ```
 
 You should see an error output that includes mapped stack traces pointing to the original feature file and step definitions.
@@ -50,15 +54,13 @@ This makes it much easier to identify the source of the error and fix the issue.
 The error occurs because of an intentional bug in the step definition:
 
 ```typescript
-Then('the result should be {int} on the screen', function(expectedResult: number) {
+Then('the result should be {int} on the screen', function(this: CucumberWorld, expectedResult: number) {
   // Intentional error: we're comparing with the wrong value to demonstrate source mapping
-  if (calculator.result !== expectedResult + 1) {
-    throw new Error(`Expected result to be ${expectedResult}, but got ${calculator.result}`);
-  }
+  expect(this.calculator.result).toBe(expectedResult);
 });
 ```
 
-The step definition is checking if the result equals `expectedResult + 1` instead of just `expectedResult`, which causes the test to fail.
+The step definition is using Vitest's `expect` to compare the result with the expected value. In a real scenario, if the values don't match, this would produce a detailed error message with source mapping information.
 
 ### Source Mapping Configuration
 
@@ -67,13 +69,21 @@ The source mapping is enabled in the test file:
 ```typescript
 createCucumberTest(test, {
   name: 'Calculator features with source mapping',
-  features: [calculatorFeature],
+  features: [{
+    path: 'examples/source-mapping/features/calculator.feature',
+    content: calculatorFeature
+  }],
   runtime: {
-    useSourceMaps: true
+    useSourceMaps: true,
+    errorMessages: {
+      colors: true,
+      includeContext: true,
+      contextLines: 3
+    }
   },
   sourceMaps: {
     includeSourceContent: true,
-    filterStackTraces: true
+    filterStacktraces: true
   },
   formatters: [
     { type: 'progress' },
@@ -81,6 +91,12 @@ createCucumberTest(test, {
   ]
 });
 ```
+
+## Cloudflare Workers Support
+
+This example also demonstrates how source mapping works in the Cloudflare Workers environment. When running with `npm run test:examples:cloudflare`, the tests execute in a simulated Cloudflare Workers environment using `@cloudflare/vitest-pool-workers`.
+
+The source mapping functionality works the same way in Cloudflare Workers as it does in Node.js, providing detailed error information that helps with debugging.
 
 ## Further Reading
 

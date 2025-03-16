@@ -34,6 +34,11 @@
     "test:workers:watch": "vitest --config vitest.workers.config.ts",
     "test:all-workers": "vitest run --config vitest.all-workers.config.ts",
     "test:all-workers:watch": "vitest --config vitest.all-workers.config.ts",
+    "test:cloudflare": "vitest run --config vitest.cloudflare-workers.config.ts",
+    "test:cloudflare:watch": "vitest --config vitest.cloudflare-workers.config.ts",
+    "test:examples": "vitest run --config vitest.examples.config.ts",
+    "test:examples:watch": "vitest --config vitest.examples.config.ts",
+    "test:examples:cloudflare": "vitest run --config vitest.cloudflare-examples.config.ts",
     "prepublishOnly": "npm run build"
   },
   "keywords": [
@@ -51,6 +56,7 @@
     "@cucumber/gherkin": "^26.2.0",
     "@cucumber/messages": "^22.0.0",
     "@cucumber/tag-expressions": "^5.0.1",
+    "glob": "^10.3.10",
     "source-map": "^0.7.4"
   },
   "devDependencies": {

@@ -13,6 +13,7 @@ import { ProgressFormatter } from './formatters/progress-formatter.js';
 import { SummaryFormatter } from './formatters/summary-formatter.js';
 import { SourceMapper } from './utils/source-mapper.js';
 import { type RuntimeOptions, type SourceMapOptions } from './types/runtime.js';
+import { optimizeForWorkers } from './utils/workers-optimizations.js';
 
 /**
  * Formatter configuration for Cucumber tests
@@ -78,6 +79,31 @@ export interface CucumberTestOptions {
    * Source map options
    */
   sourceMaps?: SourceMapOptions;
+
+  /**
+   * Cloudflare Workers specific options
+   */
+  workers?: {
+    /**
+     * Whether to optimize for Cloudflare Workers
+     */
+    optimize?: boolean;
+
+    /**
+     * Memory limit for Cloudflare Workers (in MB)
+     */
+    memoryLimit?: number;
+
+    /**
+     * CPU limit for Cloudflare Workers (in ms)
+     */
+    cpuLimit?: number;
+
+    /**
+     * Whether to use the Cloudflare Workers runtime
+     */
+    useWorkersRuntime?: boolean;
+  };
 }
 
 // Add type declaration for Miniflare in globalThis
@@ -85,6 +111,20 @@ declare global {
   interface Window {
     Miniflare?: unknown;
   }
+}
+
+/**
+ * Detect if running in Cloudflare Workers environment
+ */
+function isCloudflareWorkersEnvironment(): boolean {
+  // Check for Cloudflare Workers runtime
+  return (
+    typeof globalThis.Miniflare !== 'undefined' ||
+    typeof globalThis.Response !== 'undefined' ||
+    typeof globalThis.Request !== 'undefined' ||
+    typeof globalThis.Headers !== 'undefined' ||
+    typeof globalThis.FetchEvent !== 'undefined'
+  );
 }
 
 /**
@@ -99,6 +139,17 @@ export function createCucumberTest(
 ): void {
   // Create a test with the given name
   testFn(options.name, async () => {
+    // Check if running in Cloudflare Workers environment
+    const isWorkersEnv = options.workers?.useWorkersRuntime ?? isCloudflareWorkersEnvironment();
+    
+    // Apply Workers optimizations if needed
+    if (isWorkersEnv && (options.workers?.optimize ?? true)) {
+      optimizeForWorkers({
+        memoryLimit: options.workers?.memoryLimit,
+        cpuLimit: options.workers?.cpuLimit
+      });
+    }
+    
     // Load feature files
     const featureLoader = new WorkersFeatureLoader();
     const featurePaths: string[] = [];
@@ -107,8 +158,8 @@ export function createCucumberTest(
       if (typeof feature === 'string') {
         featurePaths.push(feature);
       } else {
-        // In a real implementation, we would register the feature file
-        // with the feature loader
+        // Register the feature file with the feature loader
+        featureLoader.register(feature.path, feature.content);
         featurePaths.push(feature.path);
       }
     }
@@ -122,13 +173,25 @@ export function createCucumberTest(
         info: console.info,
         debug: console.debug,
         stdout: {
-          write: (data: string) => process.stdout.write(data)
+          write: (data: string) => {
+            if (typeof process !== 'undefined' && process.stdout) {
+              process.stdout.write(data);
+            } else {
+              console.log(data);
+            }
+          }
         },
         stderr: {
-          write: (data: string) => process.stderr.write(data)
+          write: (data: string) => {
+            if (typeof process !== 'undefined' && process.stderr) {
+              process.stderr.write(data);
+            } else {
+              console.error(data);
+            }
+          }
         }
       },
-      env: process.env as Record<string, string>,
+      env: typeof process !== 'undefined' ? (process.env as Record<string, string>) : {},
       fetch: globalThis.fetch
     };
     
@@ -140,8 +203,7 @@ export function createCucumberTest(
         if (formatterConfig.formatter) {
           formatters[formatterConfig.type] = formatterConfig.formatter;
         } else {
-          // In a real implementation, we would create the formatter
-          // based on the type and options
+          // Create the formatter based on the type and options
           switch (formatterConfig.type) {
             case 'basic':
               formatters.basic = new BasicFormatter(formatterConfig.options);
@@ -162,13 +224,16 @@ export function createCucumberTest(
     
     // If no formatters are specified, use the progress formatter by default
     if (Object.keys(formatters).length === 0) {
-      formatters.progress = new ProgressFormatter();
+      formatters.progress = new ProgressFormatter({
+        colors: !isWorkersEnv || (options.runtime?.errorMessages?.colors ?? true)
+      });
     }
     
     // Create Cucumber options
     const cucumberOptions: WorkersCucumberOptions = {
       features: {
-        paths: featurePaths
+        paths: featurePaths,
+        loader: featureLoader
       },
       support: {
         worldParameters: options.worldParameters
@@ -177,7 +242,8 @@ export function createCucumberTest(
         dryRun: options.runtime?.dryRun,
         failFast: options.runtime?.failFast,
         useSourceMaps: options.runtime?.useSourceMaps !== false,
-        errorMessages: options.runtime?.errorMessages
+        errorMessages: options.runtime?.errorMessages,
+        isWorkersEnvironment: isWorkersEnv
       },
       filters: {
         tagExpression: options.tagExpression
@@ -185,7 +251,8 @@ export function createCucumberTest(
       sourceMaps: {
         includeSourceContent: options.sourceMaps?.includeSourceContent,
         filterStacktraces: options.sourceMaps?.filterStacktraces
-      }
+      },
+      formatters: Object.values(formatters)
     };
     
     // Run Cucumber in the Workers runtime
@@ -210,7 +277,7 @@ export function createCucumberTest(
 export async function runCucumberInVitest(
   options: WorkersCucumberOptions,
   workerRuntime: WorkersRuntime
-): Promise<any> {
+): Promise<WorkersCucumberResult> {
   // Create a source mapper if source maps are enabled
   let sourceMapper: SourceMapper | undefined;
   if (options.runtime?.useSourceMaps !== false) {

@@ -356,7 +356,8 @@
     "verify-docs": "node verification/docs-verification.js",
     "verify-phase1": "pnpm run verify-esm && pnpm run verify-examples && pnpm run verify-docs",
     "verify-phase1-no-build": "node verification/verify-without-build.mjs",
-    "verify-phase1-esm-only": "node verification/verify-phase1-with-esm-build.mjs"
+    "verify-phase1-esm-only": "node verification/verify-phase1-with-esm-build.mjs",
+    "test:cucumber-workers:cloudflare": "cd packages/cucumber-workers && pnpm run test:examples:cloudflare"
   },
   "bin": {
     "cucumber-js": "bin/cucumber.js"
