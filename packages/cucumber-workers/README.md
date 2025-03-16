@@ -19,6 +19,8 @@ npm install --save-dev @cucumber/cucumber-workers
 - **Familiar API**: Uses the same Gherkin syntax and step definition patterns as Cucumber.js
 - **In-Memory Feature Files**: Support for both file-based and in-memory feature files
 - **Optimized for Workers**: Works within the constraints of the Workers environment
+- **Source Mapping**: Maps error stack traces back to feature files for better debugging
+- **Multiple Formatters**: Support for various output formats (JSON, Progress, Summary)
 
 ## Usage
 
@@ -267,6 +269,44 @@ createCucumberTest(test, {
   ]
 });
 ```
+
+## Source Mapping
+
+Cucumber Workers includes source mapping for error stack traces, which maps error locations back to feature files and step definitions for better debugging.
+
+### Enabling Source Mapping
+
+Source mapping is enabled by default, but you can explicitly configure it in your test file:
+
+```typescript
+createCucumberTest(test, {
+  name: 'My Cucumber Test',
+  features: [/* ... */],
+  runtime: {
+    useSourceMaps: true // Enable source mapping (default is true)
+  },
+  sourceMaps: {
+    includeSourceContent: true, // Include source code snippets (default is true)
+    filterStackTraces: true // Filter out irrelevant stack frames (default is true)
+  }
+});
+```
+
+### Example Error Output
+
+With source mapping enabled, error stack traces will include the original source locations:
+
+```
+Error: Expected result to be 120, but got 120
+    at Then (features/calculator.feature:10:5)
+        Then the result should be 120 on the screen
+        ^
+    at Object.<anonymous> (step-definitions/calculator-steps.ts:30:11)
+        throw new Error(`Expected result to be ${expectedResult}, but got ${calculator.result}`);
+              ^
+```
+
+For more information, see the [source mapping documentation](./docs/source-mapping.md).
 
 ## Development Workflow
 

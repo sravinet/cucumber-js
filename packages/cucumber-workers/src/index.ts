@@ -51,6 +51,14 @@ export {
   type SummaryFormatterOptions
 } from './formatters/summary-formatter.js';
 
+// Utils
+export {
+  SourceMapper,
+  type SourceMapperOptions,
+  type SourceLocation,
+  type MappedStackFrame
+} from './utils/source-mapper.js';
+
 // DSL functions for step definitions
 import { ParameterTypeRegistry, ParameterType } from '@cucumber/cucumber-expressions';
 import { WorkersStepRegistry } from './core/step-registry.js';

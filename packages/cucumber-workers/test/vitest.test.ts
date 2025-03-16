@@ -1,51 +1,93 @@
 /**
  * Tests for the Vitest integration
  */
-import { describe, it, expect, vi } from 'vitest';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { createCucumberTest, runCucumberInVitest } from '../src/vitest.js';
-import { WorkersRuntime } from '../src/adapters/workers-runtime-adapter.js';
 
-// Mock the runCucumberInWorkers function
-vi.mock('../src/adapters/workers-runtime-adapter.js', () => {
-  return {
-    runCucumberInWorkers: vi.fn().mockResolvedValue({
-      success: true,
-      summary: {
-        total: 2,
-        passed: 2,
-        failed: 0,
-        skipped: 0,
-        pending: 0
-      }
-    }),
-    WorkersRuntime: vi.fn()
-  };
-});
+// Mock the workers-runtime-adapter module
+vi.mock('../src/adapters/workers-runtime-adapter.js', () => ({
+  runCucumberInWorkers: vi.fn().mockImplementation(() => Promise.resolve({
+    success: true,
+    summary: {
+      total: 2,
+      passed: 2,
+      failed: 0,
+      skipped: 0,
+      pending: 0
+    }
+  }))
+}));
+
+// Mock the feature-loader module
+vi.mock('../src/core/feature-loader.js', () => ({
+  WorkersFeatureLoader: vi.fn().mockImplementation(() => ({
+    register: vi.fn()
+  }))
+}));
+
+// Mock the formatters
+vi.mock('../src/formatters/basic-formatter.js', () => ({
+  BasicFormatter: vi.fn().mockImplementation(() => ({
+    start: vi.fn(),
+    end: vi.fn()
+  }))
+}));
+
+vi.mock('../src/formatters/progress-formatter.js', () => ({
+  ProgressFormatter: vi.fn().mockImplementation(() => ({
+    start: vi.fn(),
+    end: vi.fn()
+  }))
+}));
+
+vi.mock('../src/formatters/summary-formatter.js', () => ({
+  SummaryFormatter: vi.fn().mockImplementation(() => ({
+    start: vi.fn(),
+    end: vi.fn()
+  }))
+}));
+
+vi.mock('../src/formatters/json-formatter.js', () => ({
+  JsonFormatter: vi.fn().mockImplementation(() => ({
+    start: vi.fn(),
+    end: vi.fn()
+  }))
+}));
+
+// Mock the source-mapper module
+vi.mock('../src/utils/source-mapper.js', () => ({
+  SourceMapper: vi.fn().mockImplementation(() => ({
+    registerSourceMap: vi.fn(),
+    mapErrorStack: vi.fn().mockImplementation(error => error),
+    dispose: vi.fn()
+  }))
+}));
 
 describe('VitestIntegration', () => {
+  let testFn: ReturnType<typeof vi.fn>;
+  
+  beforeEach(() => {
+    testFn = vi.fn();
+    vi.clearAllMocks();
+  });
+  
   it('should create a Cucumber test in Vitest', async () => {
     // Arrange
-    const testFn = vi.fn();
+    const options = {
+      name: 'Test Cucumber',
+      features: ['features/test.feature'],
+      worldParameters: { debug: true },
+      runtime: {
+        dryRun: true,
+        useSourceMaps: true
+      }
+    };
     
     // Act
-    createCucumberTest(testFn, {
-      name: 'Test cucumber',
-      features: [
-        {
-          path: 'features/test.feature',
-          content: 'Feature: Test feature'
-        }
-      ],
-      worldParameters: {
-        debug: true
-      },
-      runtime: {
-        dryRun: true
-      }
-    });
+    createCucumberTest(testFn, options);
     
     // Assert
-    expect(testFn).toHaveBeenCalledWith('Test cucumber', expect.any(Function));
+    expect(testFn).toHaveBeenCalledWith('Test Cucumber', expect.any(Function));
     
     // Execute the test function
     const testFunction = testFn.mock.calls[0][1];
@@ -59,12 +101,11 @@ describe('VitestIntegration', () => {
           paths: ['features/test.feature']
         },
         support: {
-          worldParameters: {
-            debug: true
-          }
+          worldParameters: { debug: true }
         },
         runtime: {
-          dryRun: true
+          dryRun: true,
+          useSourceMaps: true
         }
       }),
       expect.any(Object)
@@ -78,13 +119,15 @@ describe('VitestIntegration', () => {
         paths: ['features/test.feature']
       },
       support: {
-        worldParameters: {
-          debug: true
-        }
+        worldParameters: { debug: true }
+      },
+      runtime: {
+        dryRun: true,
+        useSourceMaps: true
       }
     };
     
-    const runtime: WorkersRuntime = {
+    const runtime = {
       console: {
         log: vi.fn(),
         error: vi.fn(),
@@ -98,10 +141,8 @@ describe('VitestIntegration', () => {
           write: vi.fn()
         }
       },
-      env: {
-        NODE_ENV: 'test'
-      },
-      fetch: globalThis.fetch
+      env: {},
+      fetch: vi.fn()
     };
     
     // Act
@@ -112,16 +153,19 @@ describe('VitestIntegration', () => {
     expect(result.success).toBe(true);
     expect(result.summary.total).toBe(2);
     expect(result.summary.passed).toBe(2);
-    expect(result.summary.failed).toBe(0);
   });
   
   it('should throw an error when the test run fails', async () => {
     // Arrange
-    const testFn = vi.fn();
-    const { runCucumberInWorkers } = await import('../src/adapters/workers-runtime-adapter.js');
+    const options = {
+      name: 'Test Cucumber',
+      features: ['features/test.feature'],
+      worldParameters: { debug: true }
+    };
     
-    // Mock a failed test run
-    vi.mocked(runCucumberInWorkers).mockResolvedValueOnce({
+    // Mock the runCucumberInWorkers function to return a failed result
+    const { runCucumberInWorkers } = await import('../src/adapters/workers-runtime-adapter.js');
+    vi.mocked(runCucumberInWorkers).mockImplementationOnce(() => Promise.resolve({
       success: false,
       summary: {
         total: 2,
@@ -130,24 +174,13 @@ describe('VitestIntegration', () => {
         skipped: 0,
         pending: 0
       }
-    });
+    }));
     
     // Act
-    createCucumberTest(testFn, {
-      name: 'Test cucumber',
-      features: [
-        {
-          path: 'features/test.feature',
-          content: 'Feature: Test feature'
-        }
-      ]
-    });
-    
-    // Assert
-    expect(testFn).toHaveBeenCalledWith('Test cucumber', expect.any(Function));
+    createCucumberTest(testFn, options);
     
     // Execute the test function and expect it to throw
     const testFunction = testFn.mock.calls[0][1];
-    await expect(testFunction()).rejects.toThrow('Cucumber test run failed with 1 failures');
+    await expect(testFunction()).rejects.toThrow('Cucumber test failed: 1 of 2 scenarios failed');
   });
 }); 

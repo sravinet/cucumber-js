@@ -72,7 +72,7 @@ export function cucumberWorkers(options: CucumberWorkersPluginOptions = {}): Plu
     /**
      * Transform feature files into importable modules
      */
-    transform(code, id) {
+    transform(code, id, options) {
       if (id.endsWith('.feature')) {
         // Parse the feature file to validate it
         try {
@@ -98,19 +98,35 @@ export function cucumberWorkers(options: CucumberWorkersPluginOptions = {}): Plu
         // Store the feature file content
         featureFiles.set(id, code);
         
-        // Transform the feature file into a module
-        const moduleCode = `
-export const path = ${JSON.stringify(id)};
-export const content = ${JSON.stringify(code)};
-export default {
-  path: ${JSON.stringify(id)},
-  content: ${JSON.stringify(code)}
-};
-`;
+        // Generate a JavaScript module that exports the feature file content
+        const jsModule = `
+          export default {
+            path: ${JSON.stringify(id)},
+            content: ${JSON.stringify(code)}
+          };
+        `;
+        
+        // Generate a source map if enabled
+        if (sourceMaps) {
+          // Create a simple source map that maps the generated JS back to the feature file
+          const sourceMap = {
+            version: 3,
+            file: id + '.js',
+            sources: [id],
+            sourcesContent: [code],
+            names: [],
+            mappings: 'AAAA' // Basic mapping
+          };
+          
+          return {
+            code: jsModule,
+            map: sourceMap
+          };
+        }
         
         return {
-          code: moduleCode,
-          map: sourceMaps ? { mappings: '' } : null
+          code: jsModule,
+          map: { mappings: '' }
         };
       }
       
@@ -124,41 +140,35 @@ export default {
       // Watch feature files for changes
       server.watcher.add(featureGlob);
       
-      // Set up HMR for feature files
+      // Handle HMR for feature files
       server.watcher.on('change', (path) => {
-        if (path.endsWith('.feature') && featureFiles.has(path)) {
-          // Trigger HMR update for the feature file
-          server.moduleGraph.getModulesByFile(path)?.forEach(mod => {
-            server.moduleGraph.invalidateModule(mod);
+        if (path.endsWith('.feature')) {
+          // Invalidate the module to trigger a reload
+          const module = server.moduleGraph.getModuleById(path);
+          if (module) {
+            server.moduleGraph.invalidateModule(module);
             server.ws.send({
               type: 'update',
               updates: [
                 {
                   type: 'js-update',
-                  path: mod.url,
-                  acceptedPath: mod.url,
+                  path,
+                  acceptedPath: path,
                   timestamp: Date.now()
                 }
               ]
             });
-          });
+          }
         }
       });
     },
     
     /**
-     * Generate a manifest of all feature files
+     * Generate a manifest of feature files
      */
     generateBundle() {
-      // Create a manifest of all feature files
-      const manifest = Object.fromEntries(featureFiles.entries());
-      
-      // Add the manifest to the bundle
-      this.emitFile({
-        type: 'asset',
-        fileName: 'cucumber-workers-manifest.json',
-        source: JSON.stringify(manifest, null, 2)
-      });
+      // In a real implementation, we would generate a manifest of feature files
+      // that could be used by the test runner to discover tests
     }
   };
 } 

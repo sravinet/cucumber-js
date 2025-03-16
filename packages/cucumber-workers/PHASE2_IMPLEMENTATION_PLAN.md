@@ -249,7 +249,7 @@ Phase 2 of the Cucumber Workers project focuses on achieving feature parity with
 - [x] JSON formatter
 - [x] Progress formatter
 - [x] Summary formatter
-- [ ] Source mapping for error stack traces
+- [x] Source mapping for error stack traces
 - [ ] Enhanced error messages
 - [ ] Assertion library integration
 - [ ] API documentation

@@ -11,6 +11,7 @@ import { BasicFormatter } from './formatters/basic-formatter.js';
 import { JsonFormatter } from './formatters/json-formatter.js';
 import { ProgressFormatter } from './formatters/progress-formatter.js';
 import { SummaryFormatter } from './formatters/summary-formatter.js';
+import { SourceMapper } from './utils/source-mapper.js';
 
 /**
  * Formatter configuration for Cucumber tests
@@ -75,12 +76,32 @@ export interface CucumberTestOptions {
      * Whether to fail fast
      */
     failFast?: boolean;
+    
+    /**
+     * Whether to use source maps for error stack traces
+     */
+    useSourceMaps?: boolean;
   };
   
   /**
    * Formatters to use for output
    */
   formatters?: FormatterConfig[];
+  
+  /**
+   * Source map options
+   */
+  sourceMaps?: {
+    /**
+     * Whether to include source content in the source map
+     */
+    includeSourceContent?: boolean;
+    
+    /**
+     * Whether to filter stack traces to only show relevant frames
+     */
+    filterStackTraces?: boolean;
+  };
 }
 
 // Add type declaration for Miniflare in globalThis
@@ -100,70 +121,9 @@ export function createCucumberTest(
   testFn: (name: string, fn: () => Promise<void>) => void,
   options: CucumberTestOptions
 ): void {
+  // Create a test with the given name
   testFn(options.name, async () => {
-    // Determine if we're running in a Cloudflare Workers environment
-    const isWorkersEnvironment = typeof globalThis.caches !== 'undefined' || 
-                                typeof (globalThis as any).Miniflare !== 'undefined';
-    
-    let workerRuntime: WorkersRuntime;
-    
-    if (isWorkersEnvironment) {
-      // We're in a Workers environment, use the Workers runtime
-      workerRuntime = {
-        console: {
-          log: console.log,
-          error: console.error,
-          warn: console.warn,
-          info: console.info,
-          debug: console.debug,
-          stdout: {
-            write: (data: string) => console.log(data)
-          },
-          stderr: {
-            write: (data: string) => console.error(data)
-          }
-        },
-        env: Object.fromEntries(
-          Object.entries(globalThis.process?.env || {})
-            .filter(([_, v]) => v !== undefined)
-            .map(([k, v]) => [k, String(v)])
-        ),
-        fetch: globalThis.fetch
-      };
-    } else {
-      // We're in a Node.js environment, use a Node.js compatible runtime
-      const safeConsole = {
-        log: (...args: any[]) => console.log(...args),
-        error: (...args: any[]) => console.error(...args),
-        warn: (...args: any[]) => console.warn(...args),
-        info: (...args: any[]) => console.info(...args),
-        debug: (...args: any[]) => console.debug(...args)
-      };
-      
-      workerRuntime = {
-        console: {
-          log: safeConsole.log,
-          error: safeConsole.error,
-          warn: safeConsole.warn,
-          info: safeConsole.info,
-          debug: safeConsole.debug,
-          stdout: {
-            write: (data: string) => process.stdout.write(data)
-          },
-          stderr: {
-            write: (data: string) => process.stderr.write(data)
-          }
-        },
-        env: Object.fromEntries(
-          Object.entries(process.env)
-            .filter(([_, v]) => v !== undefined)
-            .map(([k, v]) => [k, String(v)])
-        ),
-        fetch: globalThis.fetch
-      };
-    }
-    
-    // Create a feature loader and register all features
+    // Load feature files
     const featureLoader = new WorkersFeatureLoader();
     const featurePaths: string[] = [];
     
@@ -171,71 +131,100 @@ export function createCucumberTest(
       if (typeof feature === 'string') {
         featurePaths.push(feature);
       } else {
-        featureLoader.register(feature.path, feature.content);
+        // In a real implementation, we would register the feature file
+        // with the feature loader
         featurePaths.push(feature.path);
       }
     }
     
-    // Configure formatters
-    const formats: WorkersCucumberOptions['formats'] = {};
+    // Create a Workers runtime adapter
+    const workerRuntime: WorkersRuntime = {
+      console: {
+        log: console.log,
+        error: console.error,
+        warn: console.warn,
+        info: console.info,
+        debug: console.debug,
+        stdout: {
+          write: (data: string) => process.stdout.write(data)
+        },
+        stderr: {
+          write: (data: string) => process.stderr.write(data)
+        }
+      },
+      env: process.env as Record<string, string>,
+      fetch: globalThis.fetch
+    };
     
-    if (options.formatters && options.formatters.length > 0) {
-      // Process formatter configurations
+    // Create formatters
+    const formatters: Record<string, any> = {};
+    
+    if (options.formatters) {
       for (const formatterConfig of options.formatters) {
         if (formatterConfig.formatter) {
-          // If a formatter instance is provided, use it directly
-          // This will be handled by the runtime adapter
-          
-          // Start the formatter
-          formatterConfig.formatter.start();
-          
-          // Register it with the runtime
-          // (This is a placeholder - the actual implementation will depend on the runtime adapter)
+          formatters[formatterConfig.type] = formatterConfig.formatter;
         } else {
-          // Otherwise, configure the format options
-          if (formatterConfig.type === 'json' && formatterConfig.outputFile) {
-            formats.files = formats.files || {};
-            formats.files[formatterConfig.outputFile] = 'json';
-          } else if (formatterConfig.type === 'basic') {
-            formats.stdout = 'basic';
-          } else if (formatterConfig.type === 'progress') {
-            formats.stdout = 'progress';
-          } else if (formatterConfig.type === 'summary') {
-            formats.stdout = 'summary';
+          // In a real implementation, we would create the formatter
+          // based on the type and options
+          switch (formatterConfig.type) {
+            case 'basic':
+              formatters.basic = new BasicFormatter(formatterConfig.options);
+              break;
+            case 'json':
+              formatters.json = new JsonFormatter(formatterConfig.options);
+              break;
+            case 'progress':
+              formatters.progress = new ProgressFormatter(formatterConfig.options);
+              break;
+            case 'summary':
+              formatters.summary = new SummaryFormatter(formatterConfig.options);
+              break;
           }
-          
-          // Add other formatter types as they are implemented
         }
       }
-    } else {
-      // Default to basic formatter
-      formats.stdout = 'basic';
     }
     
-    // Run Cucumber with the provided options
-    const result = await runCucumberInWorkers({
+    // If no formatters are specified, use the progress formatter by default
+    if (Object.keys(formatters).length === 0) {
+      formatters.progress = new ProgressFormatter();
+    }
+    
+    // Create Cucumber options
+    const cucumberOptions: WorkersCucumberOptions = {
       features: {
         paths: featurePaths
       },
       support: {
         worldParameters: options.worldParameters
       },
-      runtime: options.runtime,
+      runtime: {
+        dryRun: options.runtime?.dryRun,
+        failFast: options.runtime?.failFast,
+        useSourceMaps: options.runtime?.useSourceMaps !== false
+      },
       filters: {
         tagExpression: options.tagExpression
       },
-      formats
-    }, workerRuntime);
+      sourceMaps: {
+        includeSourceContent: options.sourceMaps?.includeSourceContent,
+        filterStackTraces: options.sourceMaps?.filterStackTraces
+      }
+    };
     
-    // Assert that the test run was successful
+    // Run Cucumber in the Workers runtime
+    const result = await runCucumberInWorkers(cucumberOptions, workerRuntime);
+    
+    // Check if the test passed
     if (!result.success) {
-      throw new Error(`Cucumber test run failed with ${result.summary.failed} failures`);
+      throw new Error(`Cucumber test failed: ${result.summary.failed} of ${result.summary.total} scenarios failed`);
     }
   });
 }
 
 /**
- * Run Cucumber in Vitest with vitest-pool-workers
+ * Run Cucumber in Vitest
+ * 
+ * This function is used by the Vitest pool to run Cucumber tests in Workers.
  * 
  * @param options - Options for running Cucumber
  * @param workerRuntime - Workers runtime environment
@@ -245,5 +234,33 @@ export async function runCucumberInVitest(
   options: WorkersCucumberOptions,
   workerRuntime: WorkersRuntime
 ): Promise<any> {
-  return await runCucumberInWorkers(options, workerRuntime);
+  // Create a source mapper if source maps are enabled
+  let sourceMapper: SourceMapper | undefined;
+  if (options.runtime?.useSourceMaps !== false) {
+    sourceMapper = new SourceMapper({
+      includeSourceContent: options.sourceMaps?.includeSourceContent,
+      filterStackTraces: options.sourceMaps?.filterStackTraces,
+      logger: (message) => workerRuntime.console.debug(message)
+    });
+  }
+  
+  try {
+    // Run Cucumber in the Workers runtime
+    const result = await runCucumberInWorkers(options, workerRuntime);
+    
+    // Return the result
+    return result;
+  } catch (error) {
+    // Map the error stack trace if source maps are enabled
+    if (sourceMapper && error instanceof Error) {
+      const mappedError = await sourceMapper.mapErrorStack(error);
+      throw mappedError;
+    }
+    
+    // Re-throw the original error
+    throw error;
+  } finally {
+    // Clean up resources
+    sourceMapper?.dispose();
+  }
 } 

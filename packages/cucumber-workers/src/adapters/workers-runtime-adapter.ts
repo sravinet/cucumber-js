@@ -7,6 +7,7 @@
 
 import { TagFilter } from '../core/tag-filter.js';
 import { ScenarioOutlineProcessor } from '../core/scenario-outline-processor.js';
+import { SourceMapper } from '../utils/source-mapper.js';
 
 /**
  * Interface for the Workers runtime environment
@@ -82,6 +83,11 @@ export interface WorkersCucumberOptions {
      * Whether to filter stacktraces
      */
     filterStacktraces?: boolean;
+    
+    /**
+     * Whether to use source maps for error stack traces
+     */
+    useSourceMaps?: boolean;
   };
   
   /**
@@ -123,6 +129,21 @@ export interface WorkersCucumberOptions {
      * Names to filter scenarios
      */
     names?: string[];
+  };
+  
+  /**
+   * Source map options
+   */
+  sourceMaps?: {
+    /**
+     * Whether to include source content in the source map
+     */
+    includeSourceContent?: boolean;
+    
+    /**
+     * Whether to filter stack traces to only show relevant frames
+     */
+    filterStackTraces?: boolean;
   };
 }
 
@@ -195,6 +216,17 @@ export async function runCucumberInWorkers(
   const scenarioOutlineProcessor = new ScenarioOutlineProcessor();
   runtime.console.log('Processing scenario outlines...');
   
+  // Create a source mapper if source maps are enabled
+  let sourceMapper: SourceMapper | undefined;
+  if (options.runtime?.useSourceMaps !== false) {
+    sourceMapper = new SourceMapper({
+      includeSourceContent: options.sourceMaps?.includeSourceContent !== false,
+      filterStackTraces: options.sourceMaps?.filterStackTraces !== false,
+      logger: (message) => runtime.console.debug(message)
+    });
+    runtime.console.log('Source mapping enabled for error stack traces');
+  }
+  
   // Process each feature file
   for (const featurePath of options.features.paths) {
     runtime.console.log(`Processing feature: ${featurePath}`);
@@ -219,10 +251,21 @@ export async function runCucumberInWorkers(
       runtime.console.log(`Completed feature: ${featurePath}`);
     } catch (error) {
       // Handle errors during feature processing
-      runtime.console.error(`Error processing feature ${featurePath}: ${error}`);
+      if (sourceMapper && error instanceof Error) {
+        // Map the error stack trace to original source locations
+        const mappedError = await sourceMapper.mapErrorStack(error);
+        runtime.console.error(`Error processing feature ${featurePath}: ${mappedError.message}`);
+        runtime.console.error(mappedError.stack || '');
+      } else {
+        runtime.console.error(`Error processing feature ${featurePath}: ${error}`);
+      }
+      
       failedScenarios += 1;
     }
   }
+  
+  // Clean up resources
+  sourceMapper?.dispose();
   
   // Return the test results
   return {

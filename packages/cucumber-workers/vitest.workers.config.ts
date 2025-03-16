@@ -13,7 +13,8 @@ export default defineConfig({
       'test/**/json-formatter-cloudflare.test.ts',
       'test/**/progress-formatter-cloudflare.test.ts',
       'test/**/summary-formatter-cloudflare.test.ts',
-      'test/**/cloudflare-integration.test.ts'
+      'test/**/cloudflare-integration.test.ts',
+      'test/utils/source-mapper-workers.test.ts'
     ],
     coverage: {
       provider: 'istanbul',
