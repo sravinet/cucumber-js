@@ -46,6 +46,11 @@ export {
   type ProgressFormatterOptions
 } from './formatters/progress-formatter.js';
 
+export {
+  SummaryFormatter,
+  type SummaryFormatterOptions
+} from './formatters/summary-formatter.js';
+
 // DSL functions for step definitions
 import { ParameterTypeRegistry, ParameterType } from '@cucumber/cucumber-expressions';
 import { WorkersStepRegistry } from './core/step-registry.js';

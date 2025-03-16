@@ -148,7 +148,7 @@ interface CucumberTestOptions {
 ```typescript
 interface FormatterConfig {
   type: 'basic' | 'json' | 'progress' | 'summary';
-  formatter?: BasicFormatter | JsonFormatter | ProgressFormatter;
+  formatter?: BasicFormatter | JsonFormatter | ProgressFormatter | SummaryFormatter;
   outputFile?: string;
   options?: Record<string, any>;
 }
@@ -207,6 +207,22 @@ formatter.start();
 formatter.end();
 ```
 
+### SummaryFormatter
+
+Formats test results with a detailed summary at the end of the test run, without showing progress during execution.
+
+```typescript
+const formatter = new SummaryFormatter({ 
+  colors: true,
+  showFailedSteps: true,
+  showUndefinedSteps: true,
+  showPendingSteps: true
+});
+formatter.start();
+// Run tests
+formatter.end();
+```
+
 ### JsonFormatter
 
 Formats test results as JSON for integration with reporting tools.
@@ -232,6 +248,7 @@ createCucumberTest(test, {
   formatters: [
     { type: 'basic' },                // Use the basic formatter
     { type: 'progress' },             // Use the progress formatter
+    { type: 'summary' },              // Use the summary formatter
     { type: 'json', outputFile: 'cucumber-report.json' } // Output JSON to a file
   ]
 });

@@ -12,6 +12,7 @@ export default defineConfig({
       'test/**/workers-runtime-adapter-cloudflare.test.ts',
       'test/**/json-formatter-cloudflare.test.ts',
       'test/**/progress-formatter-cloudflare.test.ts',
+      'test/**/summary-formatter-cloudflare.test.ts',
       'test/**/cloudflare-integration.test.ts'
     ],
     coverage: {

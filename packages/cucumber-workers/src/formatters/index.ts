@@ -4,4 +4,5 @@
 
 export * from './basic-formatter.js';
 export * from './json-formatter.js';
-export * from './progress-formatter.js'; 
+export * from './progress-formatter.js';
+export * from './summary-formatter.js'; 

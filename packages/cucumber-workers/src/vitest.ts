@@ -10,6 +10,7 @@ import { runCucumberInWorkers, type WorkersRuntime, type WorkersCucumberOptions 
 import { BasicFormatter } from './formatters/basic-formatter.js';
 import { JsonFormatter } from './formatters/json-formatter.js';
 import { ProgressFormatter } from './formatters/progress-formatter.js';
+import { SummaryFormatter } from './formatters/summary-formatter.js';
 
 /**
  * Formatter configuration for Cucumber tests
@@ -23,7 +24,7 @@ export interface FormatterConfig {
   /**
    * Custom formatter instance
    */
-  formatter?: BasicFormatter | JsonFormatter | ProgressFormatter;
+  formatter?: BasicFormatter | JsonFormatter | ProgressFormatter | SummaryFormatter;
   
   /**
    * Output file path
@@ -199,6 +200,8 @@ export function createCucumberTest(
             formats.stdout = 'basic';
           } else if (formatterConfig.type === 'progress') {
             formats.stdout = 'progress';
+          } else if (formatterConfig.type === 'summary') {
+            formats.stdout = 'summary';
           }
           
           // Add other formatter types as they are implemented
