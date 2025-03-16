@@ -8,19 +8,19 @@
   "types": "dist/types/index.d.ts",
   "exports": {
     ".": {
+      "types": "./dist/types/index.d.ts",
       "import": "./dist/esm/index.js",
-      "require": "./dist/cjs/index.js",
-      "types": "./dist/types/index.d.ts"
+      "require": "./dist/cjs/index.js"
     },
     "./vitest": {
+      "types": "./dist/types/vitest.d.ts",
       "import": "./dist/esm/vitest.js",
-      "require": "./dist/cjs/vitest.js",
-      "types": "./dist/types/vitest.d.ts"
+      "require": "./dist/cjs/vitest.js"
     },
     "./vite": {
+      "types": "./dist/types/vite-plugin.d.ts",
       "import": "./dist/esm/vite-plugin.js",
-      "require": "./dist/cjs/vite-plugin.js",
-      "types": "./dist/types/vite-plugin.d.ts"
+      "require": "./dist/cjs/vite-plugin.js"
     }
   },
   "files": [

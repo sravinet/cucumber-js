@@ -3,15 +3,48 @@
  */
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { cucumberWorkers } from '../src/vite-plugin.js';
+import type { Plugin } from 'vite';
+
+// Mock the @cucumber/messages module
+vi.mock('@cucumber/messages', () => {
+  return {
+    IdGenerator: {
+      uuid: () => () => 'mock-uuid'
+    }
+  };
+});
 
 // Mock the @cucumber/gherkin module
 vi.mock('@cucumber/gherkin', () => {
   return {
     Parser: class {
+      constructor() {
+        // Constructor implementation
+      }
       parse() {
         return {};
       }
+    },
+    AstBuilder: class {
+      constructor() {
+        // Constructor implementation
+      }
+    },
+    GherkinClassicTokenMatcher: class {
+      constructor() {
+        // Constructor implementation
+      }
     }
+  };
+});
+
+// Mock fs module to avoid file system operations
+vi.mock('fs', () => {
+  return {
+    readFileSync: vi.fn().mockReturnValue('mocked file content'),
+    writeFileSync: vi.fn(),
+    existsSync: vi.fn().mockReturnValue(true),
+    mkdirSync: vi.fn()
   };
 });
 
@@ -36,7 +69,9 @@ describe('VitePlugin', () => {
     const featureContent = 'Feature: Test feature';
     
     // Act
-    const result = plugin.transform(featureContent, id);
+    // Access the transform hook directly
+    const transformHook = plugin.transform as Function;
+    const result = transformHook.call(plugin, featureContent, id);
     
     // Assert
     expect(result).toBeDefined();
@@ -61,7 +96,9 @@ describe('VitePlugin', () => {
     const content = 'console.log("Hello, world!");';
     
     // Act
-    const result = plugin.transform(content, id);
+    // Access the transform hook directly
+    const transformHook = plugin.transform as Function;
+    const result = transformHook.call(plugin, content, id);
     
     // Assert
     expect(result).toBeNull();
@@ -72,7 +109,9 @@ describe('VitePlugin', () => {
     const plugin = cucumberWorkers();
     
     // Act
-    const config = plugin.config();
+    // Access the config hook directly
+    const configHook = plugin.config as Function;
+    const config = configHook.call(plugin);
     
     // Assert
     expect(config).toBeDefined();
@@ -101,7 +140,9 @@ describe('VitePlugin', () => {
     };
     
     // Act
-    plugin.configureServer(server);
+    // Access the configureServer hook directly
+    const configureServerHook = plugin.configureServer as Function;
+    configureServerHook.call(plugin, server);
     
     // Assert
     expect(server.watcher.add).toHaveBeenCalledWith('features/**/*.feature');

@@ -11,6 +11,9 @@ import { Parser } from '@cucumber/gherkin';
 import { glob } from 'glob';
 import * as path from 'path';
 import * as fs from 'fs';
+import { AstBuilder } from '@cucumber/gherkin';
+import { GherkinClassicTokenMatcher } from '@cucumber/gherkin';
+import { IdGenerator } from '@cucumber/messages';
 
 /**
  * Options for the Cucumber Workers Vite plugin
@@ -140,7 +143,9 @@ export function cucumberWorkers(options: CucumberWorkersPluginOptions = {}): Plu
         // Parse the feature file to validate it
         try {
           // Create a parser and parse the feature file
-          const parser = new Parser() as any;
+          const astBuilder = new AstBuilder(IdGenerator.uuid());
+          const tokenMatcher = new GherkinClassicTokenMatcher();
+          const parser = new Parser(astBuilder, tokenMatcher);
           
           // Parse the feature file
           parser.parse(code);

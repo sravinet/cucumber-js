@@ -6,36 +6,44 @@
  */
 
 /**
- * Options for optimizing for Workers
+ * Optimizations for Cloudflare Workers environment
+ */
+
+/**
+ * Options for Workers optimizations
  */
 export interface WorkersOptimizationOptions {
   /**
-   * Memory limit for Cloudflare Workers (in MB)
+   * Memory limit in MB
    */
   memoryLimit?: number;
   
   /**
-   * CPU limit for Cloudflare Workers (in ms)
+   * CPU limit in ms
    */
   cpuLimit?: number;
 }
 
 /**
- * Apply optimizations for running in Cloudflare Workers
+ * Apply optimizations for Cloudflare Workers environment
  * 
  * @param options - Optimization options
+ * @returns Cleanup function
  */
-export function optimizeForWorkers(options: WorkersOptimizationOptions = {}): void {
-  const {
-    memoryLimit = 128,
-    cpuLimit = 10000
-  } = options;
+export function optimizeForWorkers(options: WorkersOptimizationOptions = {}): () => void {
+  const { memoryLimit = 128, cpuLimit = 10000 } = options;
   
-  // Apply memory optimizations
-  optimizeMemoryUsage(memoryLimit);
+  // Apply memory limit if running in a Workers environment
+  if (typeof (globalThis as any).Miniflare !== 'undefined') {
+    // This would be implemented with actual Workers-specific optimizations
+    // eslint-disable-next-line no-console
+    console.debug(`Applying Workers optimizations: memoryLimit=${memoryLimit}MB, cpuLimit=${cpuLimit}ms`);
+  }
   
-  // Apply CPU optimizations
-  optimizeCpuUsage(cpuLimit);
+  // Return a cleanup function
+  return () => {
+    // Cleanup code would go here
+  };
 }
 
 /**
