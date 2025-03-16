@@ -1,0 +1,61 @@
+{
+  "name": "@cucumber/cucumber-workers",
+  "version": "0.1.0",
+  "description": "Cucumber.js for Cloudflare Workers",
+  "type": "module",
+  "main": "dist/cjs/index.js",
+  "module": "dist/esm/index.js",
+  "types": "dist/types/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/esm/index.js",
+      "require": "./dist/cjs/index.js",
+      "types": "./dist/types/index.d.ts"
+    },
+    "./vitest": {
+      "import": "./dist/esm/vitest.js",
+      "require": "./dist/cjs/vitest.js",
+      "types": "./dist/types/vitest.d.ts"
+    },
+    "./vite": {
+      "import": "./dist/esm/vite-plugin.js",
+      "require": "./dist/cjs/vite-plugin.js",
+      "types": "./dist/types/vite-plugin.d.ts"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "node scripts/build.js",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "prepublishOnly": "npm run build"
+  },
+  "keywords": [
+    "cucumber",
+    "bdd",
+    "gherkin",
+    "cloudflare",
+    "workers",
+    "testing"
+  ],
+  "author": "Cucumber Team",
+  "license": "MIT",
+  "dependencies": {
+    "@cucumber/cucumber-expressions": "^16.1.2",
+    "@cucumber/gherkin": "^26.2.0",
+    "@cucumber/messages": "^22.0.0",
+    "@cucumber/tag-expressions": "^5.0.1"
+  },
+  "devDependencies": {
+    "@types/node": "^18.0.0",
+    "typescript": "^5.0.0",
+    "vite": "^5.0.0",
+    "vitest": "^0.34.6"
+  },
+  "peerDependencies": {
+    "vite": "^4.0.0 || ^5.0.0",
+    "vitest": "^0.34.0"
+  }
+}
