@@ -4,19 +4,21 @@ This repository includes a demonstration of using Cucumber BDD tests with a Hono
 
 ## Running the Demo from the Root Directory
 
-You can run the Hono Cucumber Demo tests from the root directory of the cucumber-js repository using the following commands:
+You can run the Hono Cucumber Demo tests from the root directory of the cucumber-js repository with a single command:
 
-1. Link the cucumber-workers package:
-   ```bash
-   pnpm run link:hono
-   ```
+```bash
+pnpm run test:hono
+```
 
-2. Run the tests:
-   ```bash
-   pnpm run test:hono
-   ```
+This command automatically:
+1. Links the cucumber-workers package
+2. Runs all the tests using Vitest
 
-This will automatically link the cucumber-workers package and run the tests.
+If you need to manually link the package:
+
+```bash
+pnpm run link:hono
+```
 
 ## Navigating to the Demo Directory
 
@@ -30,7 +32,7 @@ cd packages/hono-cucumber-demo
 pnpm install
 
 # Run tests
-pnpm run test:all
+pnpm test
 ```
 
 ## Demo Features

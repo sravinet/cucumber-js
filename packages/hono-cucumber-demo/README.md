@@ -53,25 +53,25 @@ This will start the Hono application using Wrangler, making it available at http
 
 ## Running the Tests
 
-The recommended way to run the tests is with:
+To run the tests, simply use:
 
 ```bash
-pnpm run test:all
+pnpm test
 ```
 
-This command attempts different methods to run the tests until one succeeds. It automatically links the `cucumber-workers` package before running the tests.
+This command automatically:
+1. Links the `cucumber-workers` package
+2. Runs all the tests using Vitest
 
-You can also run the tests directly with:
+For development with watch mode:
 
 ```bash
-pnpm run test
+pnpm run test:watch
 ```
-
-This command will automatically link the `cucumber-workers` package before running the tests.
 
 ### Linking the cucumber-workers package
 
-If you're having issues with the `cucumber-workers` package, you can manually link it with:
+The linking process happens automatically before tests run. If you need to manually link the package:
 
 ```bash
 pnpm run link-cucumber-workers
@@ -86,52 +86,19 @@ This script:
 
 If you encounter issues with running the tests:
 
-1. **Try the automatic method detection**:
+1. **Manually link the package**: 
    ```bash
-   pnpm run test:all
-   ```
-   This script will try different methods to run the tests until one succeeds.
-
-2. **Missing dependencies**: Run the dependency installation script:
-   ```bash
-   pnpm run install:deps
+   pnpm run link-cucumber-workers
    ```
 
-3. **Vitest not found**: Try using the direct test script:
+2. **Check for missing dependencies**: 
    ```bash
-   pnpm run test:direct
-   ```
-   This script will find vitest in your node_modules directory and run it directly.
-
-4. **Binary not linked**: If pnpm isn't linking binaries correctly, try:
-   ```bash
-   pnpm install -g vitest
-   ```
-   Or use the direct path:
-   ```bash
-   ./node_modules/.bin/vitest run
+   pnpm install
    ```
 
-5. **KV namespace issues**: Set up the KV namespaces manually:
+3. **Verify the Hono package is installed**:
    ```bash
-   npx wrangler kv:namespace create COUNTER --preview
-   npx wrangler kv:namespace create COUNTER
-   ```
-
-6. **TypeScript errors**: Check for TypeScript errors:
-   ```bash
-   npx tsc --noEmit
-   ```
-
-7. **Path issues**: Make sure you're running commands from the project root directory:
-   ```bash
-   cd packages/hono-cucumber-demo
-   ```
-
-8. **Module errors**: If you see errors about ES modules vs CommonJS, make sure you're using the correct import syntax in your files:
-   ```javascript
-   // Use ES module syntax (import/export) not CommonJS (require/module.exports)
-   import { something } from 'somewhere';
+   pnpm add hono
    ```
 
 ## Why We Use ES Modules

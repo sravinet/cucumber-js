@@ -69,4 +69,4 @@ fs.symlinkSync(cucumberWorkersPath, cucumberWorkersLinkPath, 'dir');
 
 console.log('Successfully linked cucumber-workers package.');
 console.log('You can now run the tests with:');
-console.log('  pnpm run test:all'); 
+console.log('  pnpm test'); 
