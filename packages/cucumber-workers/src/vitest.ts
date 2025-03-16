@@ -6,12 +6,13 @@
  */
 
 import { WorkersFeatureLoader, type FeatureFile } from './core/feature-loader.js';
-import { runCucumberInWorkers, type WorkersRuntime, type WorkersCucumberOptions } from './adapters/workers-runtime-adapter.js';
+import { runCucumberInWorkers, type WorkersRuntime, type WorkersCucumberOptions, type WorkersCucumberResult } from './adapters/workers-runtime-adapter.js';
 import { BasicFormatter } from './formatters/basic-formatter.js';
 import { JsonFormatter } from './formatters/json-formatter.js';
 import { ProgressFormatter } from './formatters/progress-formatter.js';
 import { SummaryFormatter } from './formatters/summary-formatter.js';
 import { SourceMapper } from './utils/source-mapper.js';
+import { type RuntimeOptions, type SourceMapOptions } from './types/runtime.js';
 
 /**
  * Formatter configuration for Cucumber tests
@@ -66,22 +67,7 @@ export interface CucumberTestOptions {
   /**
    * Runtime options
    */
-  runtime?: {
-    /**
-     * Whether to run in dry run mode
-     */
-    dryRun?: boolean;
-    
-    /**
-     * Whether to fail fast
-     */
-    failFast?: boolean;
-    
-    /**
-     * Whether to use source maps for error stack traces
-     */
-    useSourceMaps?: boolean;
-  };
+  runtime?: RuntimeOptions;
   
   /**
    * Formatters to use for output
@@ -91,17 +77,7 @@ export interface CucumberTestOptions {
   /**
    * Source map options
    */
-  sourceMaps?: {
-    /**
-     * Whether to include source content in the source map
-     */
-    includeSourceContent?: boolean;
-    
-    /**
-     * Whether to filter stack traces to only show relevant frames
-     */
-    filterStackTraces?: boolean;
-  };
+  sourceMaps?: SourceMapOptions;
 }
 
 // Add type declaration for Miniflare in globalThis
@@ -200,14 +176,15 @@ export function createCucumberTest(
       runtime: {
         dryRun: options.runtime?.dryRun,
         failFast: options.runtime?.failFast,
-        useSourceMaps: options.runtime?.useSourceMaps !== false
+        useSourceMaps: options.runtime?.useSourceMaps !== false,
+        errorMessages: options.runtime?.errorMessages
       },
       filters: {
         tagExpression: options.tagExpression
       },
       sourceMaps: {
         includeSourceContent: options.sourceMaps?.includeSourceContent,
-        filterStackTraces: options.sourceMaps?.filterStackTraces
+        filterStacktraces: options.sourceMaps?.filterStacktraces
       }
     };
     
@@ -239,7 +216,7 @@ export async function runCucumberInVitest(
   if (options.runtime?.useSourceMaps !== false) {
     sourceMapper = new SourceMapper({
       includeSourceContent: options.sourceMaps?.includeSourceContent,
-      filterStackTraces: options.sourceMaps?.filterStackTraces,
+      filterStacktraces: options.sourceMaps?.filterStacktraces,
       logger: (message) => workerRuntime.console.debug(message)
     });
   }

@@ -10,11 +10,18 @@ createCucumberTest(test, {
   name: 'Calculator features with source mapping',
   features: [calculatorFeature],
   runtime: {
-    useSourceMaps: true
+    // Use source maps for error stack traces
+    useSourceMaps: true,
+    // Add enhanced error messages
+    errorMessages: {
+      colors: true,
+      includeContext: true,
+      contextLines: 3
+    }
   },
   sourceMaps: {
     includeSourceContent: true,
-    filterStackTraces: true
+    filterStacktraces: true
   },
   formatters: [
     { type: 'progress' },

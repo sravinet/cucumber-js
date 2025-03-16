@@ -6,6 +6,7 @@
  */
 
 import { TestStatus, type ScenarioResult } from './basic-formatter.js';
+import { formatStepError, createMessageBox } from '../utils/error-formatter.js';
 
 /**
  * Summary formatter options
@@ -105,7 +106,22 @@ export class SummaryFormatter {
         for (const step of failedSteps) {
           this.output(`   ✗ ${step.text}`);
           if (step.error) {
-            this.output(`       ${step.error}`);
+            // Format the error message with context information
+            const formattedError = formatStepError(
+              step.text,
+              scenario.name,
+              scenario.featurePath,
+              scenario.line,
+              step.error,
+              {
+                colors: this.options.colors,
+                includeContext: true,
+                contextLines: 3
+              }
+            );
+            
+            // Output the formatted error
+            this.output(`       ${formattedError}`);
           }
         }
         
@@ -129,7 +145,14 @@ export class SummaryFormatter {
         const undefinedSteps = scenario.steps.filter(s => s.status === TestStatus.UNDEFINED);
         for (const step of undefinedSteps) {
           this.output(`   ? ${step.text}`);
-          this.output('       Undefined. Implement this step in your code.');
+          
+          // Create a message box for the undefined step suggestion
+          const suggestion = createMessageBox(
+            'Undefined. Implement this step in your code.',
+            { colors: this.options.colors }
+          );
+          
+          this.output(`       ${suggestion}`);
         }
         
         this.output('');

@@ -6,6 +6,7 @@
  */
 
 import { SourceMapConsumer } from 'source-map';
+import { formatErrorWithMappedFrames } from './error-formatter.js';
 
 /**
  * Options for the source mapper
@@ -19,7 +20,7 @@ export interface SourceMapperOptions {
   /**
    * Whether to filter stack traces to only show relevant frames
    */
-  filterStackTraces?: boolean;
+  filterStacktraces?: boolean;
   
   /**
    * Logger function for errors
@@ -102,7 +103,7 @@ export class SourceMapper {
   constructor(options: SourceMapperOptions = {}) {
     this.options = {
       includeSourceContent: true,
-      filterStackTraces: true,
+      filterStacktraces: true,
       logger: (_message: string) => { /* noop */ },
       ...options
     };
@@ -149,13 +150,23 @@ export class SourceMapper {
     }
     
     // Filter stack frames if enabled
-    const filteredFrames = this.options.filterStackTraces
+    const filteredFrames = this.options.filterStacktraces
       ? this.filterStackFrames(mappedFrames)
       : mappedFrames;
     
     // Create a new error with the mapped stack trace
     const mappedError = new Error(error.message);
-    mappedError.stack = this.formatStackTrace(filteredFrames);
+    
+    // Format the error message with context information
+    const formattedStack = formatErrorWithMappedFrames(error, filteredFrames, {
+      colors: true,
+      includeSourceContent: this.options.includeSourceContent,
+      includeContext: true,
+      contextLines: 3
+    });
+    
+    // Set the formatted stack as the error stack
+    mappedError.stack = formattedStack;
     
     return mappedError;
   }
@@ -294,40 +305,6 @@ export class SourceMapper {
       // Keep other frames
       return true;
     });
-  }
-  
-  /**
-   * Format mapped stack frames into a stack trace string
-   * 
-   * @param frames - Mapped stack frames
-   * @returns Formatted stack trace string
-   */
-  private formatStackTrace(frames: MappedStackFrame[]): string {
-    let stackTrace = 'Error\n';
-    
-    for (const frame of frames) {
-      const { functionName, originalLocation } = frame;
-      const { source, line, column, content } = originalLocation;
-      
-      // Add the stack frame
-      stackTrace += `    at ${functionName} (${source}:${line}:${column})\n`;
-      
-      // Add source content if available
-      if (content) {
-        const lines = content.split('\n');
-        const lineIndex = line - 1;
-        
-        if (lineIndex >= 0 && lineIndex < lines.length) {
-          // Add the source line
-          stackTrace += `        ${lines[lineIndex]}\n`;
-          
-          // Add a pointer to the column
-          stackTrace += `        ${' '.repeat(column - 1)}^\n`;
-        }
-      }
-    }
-    
-    return stackTrace;
   }
   
   /**

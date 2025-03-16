@@ -65,18 +65,18 @@ describe('SummaryFormatter', () => {
       status: TestStatus.FAILED,
       steps: [
         {
-          text: 'Given a step that passes',
+          text: 'Given I have a test',
           status: TestStatus.PASSED,
-          duration: 1
+          duration: 5
         },
         {
           text: 'When I do something that fails',
           status: TestStatus.FAILED,
-          duration: 2,
-          error: 'Expected true to be false'
+          error: 'Expected true to be false',
+          duration: 10
         },
         {
-          text: 'Then I should not reach this step',
+          text: 'Then it should pass',
           status: TestStatus.SKIPPED,
           duration: 0
         }
@@ -93,7 +93,13 @@ describe('SummaryFormatter', () => {
     // Verify failed steps are shown
     const outputCalls = output.mock.calls.map(call => call[0]);
     expect(outputCalls).toContain('   ✗ When I do something that fails');
-    expect(outputCalls).toContain('       Expected true to be false');
+    
+    // With our new error formatter, the error message is now part of a formatted string
+    // that includes context information, so we need to check for a partial match
+    const errorOutputs = outputCalls.filter(call => 
+      typeof call === 'string' && call.includes('Expected true to be false')
+    );
+    expect(errorOutputs.length).toBeGreaterThan(0);
     
     // Verify statistics
     expect(output).toHaveBeenCalledWith('Statistics:');

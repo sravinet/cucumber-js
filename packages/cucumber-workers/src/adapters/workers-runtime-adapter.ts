@@ -8,6 +8,8 @@
 import { TagFilter } from '../core/tag-filter.js';
 import { ScenarioOutlineProcessor } from '../core/scenario-outline-processor.js';
 import { SourceMapper } from '../utils/source-mapper.js';
+import { formatError, formatGherkinParseError, formatStepError } from '../utils/error-formatter.js';
+import { type RuntimeOptions, type SourceMapOptions, type ErrorMessageOptions } from '../types/runtime.js';
 
 /**
  * Interface for the Workers runtime environment
@@ -68,27 +70,7 @@ export interface WorkersCucumberOptions {
   /**
    * Runtime options
    */
-  runtime?: {
-    /**
-     * Whether to run in dry run mode
-     */
-    dryRun?: boolean;
-    
-    /**
-     * Whether to fail fast
-     */
-    failFast?: boolean;
-    
-    /**
-     * Whether to filter stacktraces
-     */
-    filterStacktraces?: boolean;
-    
-    /**
-     * Whether to use source maps for error stack traces
-     */
-    useSourceMaps?: boolean;
-  };
+  runtime?: RuntimeOptions;
   
   /**
    * Formatter options
@@ -134,17 +116,7 @@ export interface WorkersCucumberOptions {
   /**
    * Source map options
    */
-  sourceMaps?: {
-    /**
-     * Whether to include source content in the source map
-     */
-    includeSourceContent?: boolean;
-    
-    /**
-     * Whether to filter stack traces to only show relevant frames
-     */
-    filterStackTraces?: boolean;
-  };
+  sourceMaps?: SourceMapOptions;
 }
 
 /**
@@ -188,7 +160,7 @@ export interface WorkersCucumberResult {
 }
 
 /**
- * Run Cucumber in the Workers runtime
+ * Run Cucumber in Workers
  * 
  * @param options - Options for running Cucumber
  * @param runtime - Workers runtime environment
@@ -220,62 +192,83 @@ export async function runCucumberInWorkers(
   let sourceMapper: SourceMapper | undefined;
   if (options.runtime?.useSourceMaps !== false) {
     sourceMapper = new SourceMapper({
-      includeSourceContent: options.sourceMaps?.includeSourceContent !== false,
-      filterStackTraces: options.sourceMaps?.filterStackTraces !== false,
+      includeSourceContent: options.sourceMaps?.includeSourceContent,
+      filterStacktraces: options.sourceMaps?.filterStacktraces,
       logger: (message) => runtime.console.debug(message)
     });
     runtime.console.log('Source mapping enabled for error stack traces');
   }
   
-  // Process each feature file
-  for (const featurePath of options.features.paths) {
-    runtime.console.log(`Processing feature: ${featurePath}`);
-    
-    try {
-      // In a real implementation, we would:
-      // 1. Load the feature file content
-      // 2. Parse the Gherkin document
-      // 3. Process scenario outlines
-      // 4. Apply tag filters
-      // 5. Execute scenarios
-      // 6. Collect results
-      
-      // For now, we'll simulate some test execution
-      totalScenarios += 2;
-      passedScenarios += 1;
-      failedScenarios += 0;
-      skippedScenarios += 1;
-      pendingScenarios += 0;
-      
-      // Log progress
-      runtime.console.log(`Completed feature: ${featurePath}`);
-    } catch (error) {
-      // Handle errors during feature processing
-      if (sourceMapper && error instanceof Error) {
-        // Map the error stack trace to original source locations
-        const mappedError = await sourceMapper.mapErrorStack(error);
-        runtime.console.error(`Error processing feature ${featurePath}: ${mappedError.message}`);
-        runtime.console.error(mappedError.stack || '');
-      } else {
-        runtime.console.error(`Error processing feature ${featurePath}: ${error}`);
-      }
-      
-      failedScenarios += 1;
-    }
-  }
-  
-  // Clean up resources
-  sourceMapper?.dispose();
-  
-  // Return the test results
-  return {
-    success: failedScenarios === 0,
-    summary: {
-      total: totalScenarios,
-      passed: passedScenarios,
-      failed: failedScenarios,
-      skipped: skippedScenarios,
-      pending: pendingScenarios
-    }
+  // Get error message options
+  const errorMessageOptions = {
+    colors: options.runtime?.errorMessages?.colors !== false,
+    includeContext: options.runtime?.errorMessages?.includeContext !== false,
+    contextLines: options.runtime?.errorMessages?.contextLines || 3
   };
+  
+  try {
+    // Process each feature file
+    for (const featurePath of options.features.paths) {
+      runtime.console.log(`Processing feature: ${featurePath}`);
+      
+      try {
+        // In a real implementation, we would:
+        // 1. Load the feature file content
+        // 2. Parse the Gherkin document
+        // 3. Process scenario outlines
+        // 4. Apply tag filters
+        // 5. Execute scenarios
+        // 6. Collect results
+        
+        // For now, we'll simulate some test execution
+        totalScenarios += 2;
+        passedScenarios += 1;
+        failedScenarios += 0;
+        skippedScenarios += 1;
+        pendingScenarios += 0;
+        
+        // Log progress
+        runtime.console.log(`Completed feature: ${featurePath}`);
+      } catch (error) {
+        // Handle errors during feature processing
+        if (sourceMapper && error instanceof Error) {
+          // Map the error stack trace to original source locations
+          const mappedError = await sourceMapper.mapErrorStack(error);
+          
+          // Format the error message with context information
+          const errorMessage = formatError(mappedError);
+          
+          // Log the error
+          runtime.console.error(`Error processing feature ${featurePath}: ${mappedError.message}`);
+          runtime.console.error(errorMessage);
+        } else if (error instanceof Error) {
+          // Format the error message
+          const errorMessage = formatError(error);
+          
+          // Log the error
+          runtime.console.error(`Error processing feature ${featurePath}: ${error.message}`);
+          runtime.console.error(errorMessage);
+        } else {
+          runtime.console.error(`Error processing feature ${featurePath}: ${error}`);
+        }
+        
+        failedScenarios += 1;
+      }
+    }
+    
+    // Return the test results
+    return {
+      success: failedScenarios === 0,
+      summary: {
+        total: totalScenarios,
+        passed: passedScenarios,
+        failed: failedScenarios,
+        skipped: skippedScenarios,
+        pending: pendingScenarios
+      }
+    };
+  } finally {
+    // Clean up resources
+    sourceMapper?.dispose();
+  }
 } 
